@@ -1,27 +1,49 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
 import { Toaster as Sonner } from "@/components/ui/sonner";
-import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import Index from "./pages/Index.tsx";
-import NotFound from "./pages/NotFound.tsx";
+import { LocaleProvider } from "@/contexts/LocaleContext";
+import { defaultLocale } from "@/lib/i18n";
+import HomePage from "./pages/HomePage";
+import BlogListPage from "./pages/BlogListPage";
+import BlogPostPage from "./pages/BlogPostPage";
+import CategoriesPage from "./pages/CategoriesPage";
+import AdminPage from "./pages/AdminPage";
+import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+function LocaleRoutes({ locale }: { locale: "en" | "es" }) {
+  return (
+    <LocaleProvider locale={locale}>
+      <Routes>
+        <Route path="" element={<HomePage />} />
+        <Route path="blog" element={<BlogListPage />} />
+        <Route path="blog/:slug" element={<BlogPostPage />} />
+        <Route path="categories" element={<CategoriesPage />} />
+        <Route path="admin" element={<AdminPage />} />
+      </Routes>
+    </LocaleProvider>
+  );
+}
+
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <HelmetProvider>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Navigate to={`/${defaultLocale}`} replace />} />
+            <Route path="/en/*" element={<LocaleRoutes locale="en" />} />
+            <Route path="/es/*" element={<LocaleRoutes locale="es" />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </HelmetProvider>
 );
 
 export default App;
