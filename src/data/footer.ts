@@ -21,7 +21,7 @@ export function getFooterLinks(): FooterLink[] {
 }
 
 export function getFooterCategories(locale: Locale): FooterCategory[] {
-  return categories.slice(0, 3).map((cat) => ({
+  return categories.map((cat) => ({
     name: cat.name,
     slug: cat.slug,
     icon: cat.icon,
