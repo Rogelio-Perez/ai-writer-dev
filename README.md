@@ -62,4 +62,4 @@ src/
 - `/:locale/blog` - Blog list
 - `/:locale/blog/:slug` - Blog post
 - `/:locale/categories` - Categories page
-- `/:locale/admin` - Admin dashboard
+- `/:locale/categories` - Categories page

@@ -16,7 +16,6 @@ export default function BlogLayout({ children }: { children: ReactNode }) {
     { label: t(locale, "nav.home"), path: localePath(locale, "") },
     { label: t(locale, "nav.blog"), path: localePath(locale, "/blog") },
     { label: t(locale, "nav.categories"), path: localePath(locale, "/categories") },
-    { label: t(locale, "nav.admin"), path: localePath(locale, "/admin") },
   ];
 
   return (

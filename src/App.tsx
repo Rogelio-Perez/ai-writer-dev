@@ -9,7 +9,6 @@ import HomePage from "./pages/HomePage";
 import BlogListPage from "./pages/BlogListPage";
 import BlogPostPage from "./pages/BlogPostPage";
 import CategoriesPage from "./pages/CategoriesPage";
-import AdminPage from "./pages/AdminPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,7 +21,6 @@ function LocaleRoutes({ locale }: { locale: "en" | "es" }) {
         <Route path="blog" element={<BlogListPage />} />
         <Route path="blog/:slug" element={<BlogPostPage />} />
         <Route path="categories" element={<CategoriesPage />} />
-        <Route path="admin" element={<AdminPage />} />
       </Routes>
     </LocaleProvider>
   );
