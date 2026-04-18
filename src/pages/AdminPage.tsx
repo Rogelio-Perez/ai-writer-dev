@@ -22,7 +22,7 @@ export default function AdminPage() {
       return;
     }
     setIsGenerating(true);
-    // Simulate AI generation (connect to Lovable Cloud for real AI)
+    // Simulate AI generation
     setTimeout(() => {
       setOutline(`## Introduction
 What is ${keywords} and why developers should care.
@@ -248,7 +248,7 @@ ${keywords} is a game-changer for modern development. Start with the basics, exp
                       {t(locale, "admin.publish")}
                     </button>
                     <button
-                      onClick={() => toast.info(locale === "es" ? "Conecta Lovable Cloud para traducir" : "Connect Lovable Cloud to translate")}
+                      onClick={() => toast.info(locale === "es" ? "Traducción coming soon" : "Translation feature coming soon")}
                       className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-border text-foreground text-sm font-medium hover:bg-secondary transition-colors"
                     >
                       <Languages className="w-4 h-4" />
@@ -274,7 +274,7 @@ ${keywords} is a game-changer for modern development. Start with the basics, exp
                 : "Generate article ideas based on current AI and development trends."}
             </p>
             <button
-              onClick={() => toast.info(locale === "es" ? "Conecta Lovable Cloud para generar ideas con IA" : "Connect Lovable Cloud to generate AI-powered ideas")}
+              onClick={() => toast.info(locale === "es" ? "Generación de ideas coming soon" : "Idea generation feature coming soon")}
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
             >
               <Lightbulb className="w-4 h-4" />

@@ -8,7 +8,6 @@ import TableOfContents from "@/components/blog/TableOfContents";
 import PostCard from "@/components/blog/PostCard";
 import SEOHead from "@/components/blog/SEOHead";
 import BlogLayout from "@/components/blog/BlogLayout";
-import { AffiliateBlock } from "@/components/blog/MonetizationBlocks";
 import { Clock, ArrowLeft, Tag } from "lucide-react";
 
 export default function BlogPostPage() {
@@ -87,14 +86,6 @@ export default function BlogPostPage() {
         <div className="flex gap-10 lg:flex-row flex-col-reverse">
           <div className="flex-1 max-w-3xl">
             <MarkdownRenderer content={content} />
-
-            {/* Monetization example */}
-            <AffiliateBlock
-              title={locale === "es" ? "¿Quieres construir apps con IA?" : "Want to build apps with AI?"}
-              description={locale === "es" ? "Prueba Lovable gratis y construye tu próximo proyecto en minutos." : "Try Lovable for free and build your next project in minutes."}
-              link="https://lovable.dev"
-              cta={locale === "es" ? "Probar Gratis" : "Try Free"}
-            />
 
             {/* Tags */}
             <div className="mt-10 pt-6 border-t border-border">
