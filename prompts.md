@@ -30,7 +30,9 @@ Generate a complete blog article in **{{LANGUAGE}}** about **{{TOPIC}}**.
 5. **Tone**: Professional but approachable, developer-focused
 
 ### Output Format:
+
 Return JSON with:
+
 - title: { en: "...", es: "..." }
 - excerpt: { en: "...", es: "..." }
 - content: { en: "...", es: "..." }
@@ -44,6 +46,7 @@ Return JSON with:
 Generate a detailed outline for a blog article about **{{TOPIC}}** targeting developers.
 
 Include:
+
 - Main sections with 2-3 subsections each
 - Key points to cover in each section
 - Suggested code examples or demos
@@ -56,6 +59,7 @@ Include:
 For the article: **{{ARTICLE_TITLE}}**
 
 Generate:
+
 1. SEO title (under 60 characters)
 2. Meta description (150-160 characters)
 3. 5-7 relevant tags
@@ -95,12 +99,15 @@ Make it actionable - readers should know which tool fits their needs.
 - `automation` - Workflow automation
 - `guides` - Comparison and recommendation articles
 - `news` - Industry news and updates
+- `machine-learning` - ML concepts, models, and implementations
+- `apis` - AI API integrations and implementations
 
 ---
 
 ## Tags Guidelines
 
 Use 3-6 relevant tags per article:
+
 - Tool names (e.g., "copilot", "cursor", "claude")
 - Topics (e.g., "productivity", "automation", "tutorial")
 - Categories (e.g., "ai", "beginner", "advanced")

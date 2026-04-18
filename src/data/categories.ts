@@ -54,4 +54,20 @@ export const categories: Category[] = [
     icon: "📖",
     postCount: getPostCount("guides"),
   },
+  {
+    id: "machine-learning",
+    name: { en: "Machine Learning", es: "Machine Learning" },
+    slug: "machine-learning",
+    description: { en: "ML concepts, models, and implementations", es: "Conceptos de ML, modelos e implementaciones" },
+    icon: "🧠",
+    postCount: getPostCount("machine-learning"),
+  },
+  {
+    id: "apis",
+    name: { en: "AI APIs", es: "APIs de IA" },
+    slug: "apis",
+    description: { en: "AI API integrations and implementations", es: "Integraciones e implementaciones de APIs de IA" },
+    icon: "🔌",
+    postCount: getPostCount("apis"),
+  },
 ];
