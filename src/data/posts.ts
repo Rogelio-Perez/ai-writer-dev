@@ -5576,6 +5576,1161 @@ Replicate is perfect for experimenting with open-source LLMs without managing in
     featured: false,
     image: "",
   },
+  {
+    slug: "build-rag-chatbot-nextjs-openai",
+    title: {
+      en: "Build a RAG Chatbot with Next.js and OpenAI",
+      es: "Construye un chatbot RAG con Next.js y OpenAI",
+    },
+    excerpt: {
+      en: "A practical tutorial for building a Retrieval-Augmented Generation chatbot with Next.js, embeddings, and a clean developer workflow.",
+      es: "Un tutorial practico para crear un chatbot RAG con Next.js, embeddings y un flujo de trabajo limpio para developers.",
+    },
+    content: {
+      en: `## Introduction
+
+RAG is one of the fastest ways to turn static documentation into a useful product. Instead of asking an LLM to answer from memory alone, you retrieve relevant context from your own knowledge base and feed that context into the model before it responds.
+
+In this tutorial, you'll build a simple RAG chatbot with Next.js and OpenAI that can answer questions about your docs, internal guides, or support content.
+
+## What Is a RAG Chatbot?
+
+RAG stands for **Retrieval-Augmented Generation**.
+
+The workflow is straightforward:
+
+1. Split documents into chunks
+2. Convert each chunk into an embedding
+3. Store embeddings in a vector database
+4. Embed the user's query
+5. Retrieve the most relevant chunks
+6. Generate an answer using the retrieved context
+
+This pattern improves accuracy, reduces hallucinations, and lets you keep answers grounded in your own content.
+
+## Why It Matters
+
+A plain chat UI is easy to build, but a trustworthy assistant is harder. RAG gives you a practical bridge between generic LLM intelligence and product-specific knowledge.
+
+It is especially useful when:
+
+- Your docs change often
+- You need answers tied to source material
+- You want faster onboarding for users or teammates
+- You need a support assistant without training a custom model
+
+## Step-by-Step Tutorial
+
+### 1. Create the App
+
+\`\`\`bash
+npx create-next-app@latest devai-rag
+cd devai-rag
+npm install openai ai @ai-sdk/react
+\`\`\`
+
+### 2. Define a Chunk Type
+
+\`\`\`typescript
+export interface DocChunk {
+  id: string;
+  title: string;
+  content: string;
+  source: string;
+  embedding: number[];
+}
+\`\`\`
+
+### 3. Generate Embeddings for Your Docs
+
+\`\`\`typescript
+import OpenAI from "openai";
+
+const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+export async function createEmbedding(input: string) {
+  const response = await client.embeddings.create({
+    model: "text-embedding-3-small",
+    input,
+  });
+
+  return response.data[0].embedding;
+}
+\`\`\`
+
+### 4. Add a Search Function
+
+\`\`\`typescript
+export async function searchRelevantChunks(query: string) {
+  const queryEmbedding = await createEmbedding(query);
+
+  return vectorStore.similaritySearch(queryEmbedding, 4);
+}
+\`\`\`
+
+### 5. Build the Chat Route
+
+\`\`\`typescript
+import OpenAI from "openai";
+
+const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+export async function POST(req: Request) {
+  const { question } = await req.json();
+  const matches = await searchRelevantChunks(question);
+
+  const context = matches
+    .map((item) => \`Source: \${item.source}\\n\\n\${item.content}\`)
+    .join("\\n\\n---\\n\\n");
+
+  const response = await client.responses.create({
+    model: "gpt-4.1-mini",
+    input: [
+      {
+        role: "system",
+        content: "Answer using only the provided context. If the answer is missing, say so clearly.",
+      },
+      {
+        role: "user",
+        content: \`Question: \${question}\\n\\nContext:\\n\${context}\`,
+      },
+    ],
+  });
+
+  return Response.json({ answer: response.output_text });
+}
+\`\`\`
+
+### 6. Show Sources in the UI
+
+Showing sources makes answers easier to validate and creates trust.
+
+\`\`\`typescript
+type ChatAnswer = {
+  answer: string;
+  sources: Array<{ title: string; source: string }>;
+};
+\`\`\`
+
+### 7. Add Basic Safeguards
+
+- Reject empty questions
+- Limit the number of returned chunks
+- Strip irrelevant boilerplate before embedding
+- Log unanswered questions for future content improvements
+
+## Use Cases
+
+- Docs Assistant
+- Internal Knowledge Bot
+- Course Companion
+- Support Deflection
+
+## Pros and Cons
+
+**Pros:**
+- Improves answer accuracy
+- Keeps responses grounded in your content
+- Works with frequently updated docs
+- Faster to ship than fine-tuning
+
+**Cons:**
+- Requires chunking and indexing strategy
+- Retrieval quality depends on document quality
+- Poor prompts can still produce weak answers
+- Needs monitoring as content grows
+
+## Conclusion
+
+A RAG chatbot is a practical product pattern, not just an AI demo. Start with a narrow dataset, log every weak answer, and improve retrieval before you add more model complexity.`,
+      es: `## Introduccion
+
+RAG es una de las formas mas rapidas de convertir documentacion estatica en un producto util. En lugar de pedirle a un LLM que responda solo desde memoria, recuperas contexto relevante de tu propia base de conocimiento y se lo pasas al modelo antes de responder.
+
+En este tutorial vas a construir un chatbot RAG con Next.js y OpenAI para responder preguntas sobre documentacion, guias internas o contenido de soporte.
+
+## Que es un chatbot RAG?
+
+RAG significa **Retrieval-Augmented Generation**.
+
+El flujo es directo:
+
+1. Dividir documentos en fragmentos
+2. Convertir cada fragmento en un embedding
+3. Guardar embeddings en una base vectorial
+4. Crear embedding de la pregunta del usuario
+5. Recuperar los fragmentos mas relevantes
+6. Generar la respuesta usando ese contexto
+
+Este patron mejora la precision, reduce alucinaciones y mantiene las respuestas conectadas a tu contenido.
+
+## Por que importa
+
+Una interfaz de chat es facil de construir, pero un asistente confiable es mas dificil. RAG te da un puente practico entre la inteligencia general del modelo y el conocimiento especifico de tu producto.
+
+## Tutorial paso a paso
+
+### 1. Crear la app
+
+\`\`\`bash
+npx create-next-app@latest devai-rag
+cd devai-rag
+npm install openai ai @ai-sdk/react
+\`\`\`
+
+### 2. Definir el tipo de chunk
+
+\`\`\`typescript
+export interface DocChunk {
+  id: string;
+  title: string;
+  content: string;
+  source: string;
+  embedding: number[];
+}
+\`\`\`
+
+### 3. Generar embeddings para tus docs
+
+\`\`\`typescript
+import OpenAI from "openai";
+
+const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+export async function createEmbedding(input: string) {
+  const response = await client.embeddings.create({
+    model: "text-embedding-3-small",
+    input,
+  });
+
+  return response.data[0].embedding;
+}
+\`\`\`
+
+### 4. Agregar una funcion de busqueda
+
+\`\`\`typescript
+export async function searchRelevantChunks(query: string) {
+  const queryEmbedding = await createEmbedding(query);
+
+  return vectorStore.similaritySearch(queryEmbedding, 4);
+}
+\`\`\`
+
+### 5. Construir la ruta de chat
+
+\`\`\`typescript
+import OpenAI from "openai";
+
+const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+export async function POST(req: Request) {
+  const { question } = await req.json();
+  const matches = await searchRelevantChunks(question);
+
+  const context = matches
+    .map((item) => \`Source: \${item.source}\\n\\n\${item.content}\`)
+    .join("\\n\\n---\\n\\n");
+
+  const response = await client.responses.create({
+    model: "gpt-4.1-mini",
+    input: [
+      {
+        role: "system",
+        content: "Answer using only the provided context. If the answer is missing, say so clearly.",
+      },
+      {
+        role: "user",
+        content: \`Question: \${question}\\n\\nContext:\\n\${context}\`,
+      },
+    ],
+  });
+
+  return Response.json({ answer: response.output_text });
+}
+\`\`\`
+
+### 6. Mostrar fuentes en la UI
+
+\`\`\`typescript
+type ChatAnswer = {
+  answer: string;
+  sources: Array<{ title: string; source: string }>;
+};
+\`\`\`
+
+### 7. Agregar protecciones basicas
+
+- Rechaza preguntas vacias
+- Limita la cantidad de chunks recuperados
+- Elimina boilerplate irrelevante antes de crear embeddings
+- Registra preguntas sin respuesta para mejorar el contenido
+
+## Casos de uso
+
+- Asistente de docs
+- Bot interno
+- Companion educativo
+- Deflexion de soporte
+
+## Pros y contras
+
+**Pros:**
+- Mejora la precision de las respuestas
+- Mantiene salidas conectadas a tu contenido
+- Funciona bien con docs que cambian seguido
+- Es mas rapido de lanzar que hacer fine-tuning
+
+**Contras:**
+- Requiere una buena estrategia de chunking e indice
+- La calidad depende de la calidad de los documentos
+- Prompts pobres pueden producir malas respuestas
+- Necesita monitoreo al crecer el contenido
+
+## Conclusion
+
+Un chatbot RAG es un patron de producto practico, no solo un demo de IA. Empieza con un dataset pequeno, registra cada respuesta debil y mejora retrieval antes de agregar mas complejidad al modelo.`,
+    },
+    category: "tutorials",
+    tags: ["rag", "nextjs", "openai", "embeddings", "tutorial"],
+    author: "DevAI Team",
+    publishedAt: "2026-04-18",
+    readTime: 3,
+    featured: false,
+    image: "",
+  },
+  {
+    slug: "github-actions-ai-release-notes",
+    title: {
+      en: "Automate Release Notes with GitHub Actions and AI",
+      es: "Automatiza release notes con GitHub Actions e IA",
+    },
+    excerpt: {
+      en: "Learn how to generate draft release notes from merged pull requests using GitHub Actions, structured prompts, and lightweight review safeguards.",
+      es: "Aprende a generar release notes borrador desde pull requests usando GitHub Actions, prompts estructurados y protecciones ligeras de revision.",
+    },
+    content: {
+      en: `## Introduction
+
+Writing release notes is valuable work, but it is also repetitive and easy to postpone. AI is a strong fit for this task because the raw material already exists in pull requests, commit messages, and labels.
+
+In this tutorial, you'll build an automation flow that drafts release notes whenever you prepare a release.
+
+## What Are AI-Generated Release Notes?
+
+The idea is simple:
+
+- Collect merged pull requests for a release window
+- Extract titles, labels, and summaries
+- Ask the model to group changes into user-friendly sections
+- Publish a draft for human review
+
+The key word is **draft**. The model should speed up the first pass, not replace editorial judgment.
+
+## Why It Matters
+
+Teams often have two bad options: skip release notes or write them in a rush. A lightweight AI workflow gives you better consistency without adding much process overhead.
+
+## Step-by-Step Tutorial
+
+### 1. Define the Output Format
+
+- Added
+- Improved
+- Fixed
+- Breaking Changes
+
+### 2. Create a Workflow Trigger
+
+\`\`\`yaml
+name: draft-release-notes
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        required: true
+        type: string
+\`\`\`
+
+### 3. Gather Pull Request Data
+
+\`\`\`yaml
+- name: Collect merged PRs
+  run: |
+    gh pr list --state merged --limit 30 --json title,number,labels,mergedAt,body > prs.json
+  env:
+    GH_TOKEN: \${{ secrets.GITHUB_TOKEN }}
+\`\`\`
+
+### 4. Send a Structured Prompt
+
+\`\`\`typescript
+const prompt = [
+  "Draft release notes for version " + version + ".",
+  "",
+  "Rules:",
+  "- Group changes into Added, Improved, Fixed, Breaking Changes",
+  "- Write for end users, not internal engineers",
+  "- Ignore low-value maintenance work unless user-facing",
+  "- Keep each bullet to one sentence",
+  "",
+  "PR data:",
+  JSON.stringify(prs, null, 2),
+].join("\\n");
+\`\`\`
+
+### 5. Generate the Draft
+
+\`\`\`typescript
+import OpenAI from "openai";
+
+const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+const response = await client.responses.create({
+  model: "gpt-4.1-mini",
+  input: prompt,
+});
+
+console.log(response.output_text);
+\`\`\`
+
+### 6. Save the Result to the Release Draft
+
+\`\`\`yaml
+- name: Create draft release
+  run: |
+    gh release create \${{ inputs.version }} --draft --notes-file release-notes.md
+  env:
+    GH_TOKEN: \${{ secrets.GITHUB_TOKEN }}
+\`\`\`
+
+### 7. Add Review Safeguards
+
+- Require a maintainer review before publishing
+- Exclude PRs labeled \`chore\` or \`internal\`
+- Keep a fallback template if model output is weak
+- Log which PRs were included
+
+## Use Cases
+
+- Product releases
+- Changelogs
+- Customer updates
+- Internal platform summaries
+
+## Pros and Cons
+
+**Pros:**
+- Saves recurring editorial time
+- Produces more consistent release structure
+- Encourages better PR labeling
+- Fits existing GitHub workflows
+
+**Cons:**
+- Weak PR descriptions produce weak notes
+- Can overstate small changes
+- Still requires human review
+- Needs prompt tuning over time
+
+## Conclusion
+
+Automated release notes are most useful when they remove blank-page work. Keep the flow deterministic, keep the prompt strict, and treat AI output as a draft.`,
+      es: `## Introduccion
+
+Escribir release notes tiene valor, pero tambien es trabajo repetitivo y facil de posponer. La IA encaja muy bien aqui porque el material base ya existe en pull requests, commits y labels.
+
+En este tutorial vas a construir un flujo que genera release notes borrador cada vez que preparas una version.
+
+## Que son las release notes generadas con IA?
+
+La idea es simple:
+
+- Recolectar pull requests mergeados en una ventana de release
+- Extraer titulos, labels y resumenes
+- Pedir al modelo que agrupe cambios en secciones utiles
+- Publicar un borrador para revision humana
+
+La palabra clave es **borrador**. El modelo debe acelerar el primer paso, no reemplazar el criterio editorial.
+
+## Por que importa
+
+Muchos equipos terminan con dos malas opciones: omitir release notes o escribirlas con prisa. Un flujo ligero con IA te da mas consistencia sin agregar demasiado proceso.
+
+## Tutorial paso a paso
+
+### 1. Definir el formato de salida
+
+- Added
+- Improved
+- Fixed
+- Breaking Changes
+
+### 2. Crear un trigger de workflow
+
+\`\`\`yaml
+name: draft-release-notes
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        required: true
+        type: string
+\`\`\`
+
+### 3. Recolectar datos de pull requests
+
+\`\`\`yaml
+- name: Collect merged PRs
+  run: |
+    gh pr list --state merged --limit 30 --json title,number,labels,mergedAt,body > prs.json
+  env:
+    GH_TOKEN: \${{ secrets.GITHUB_TOKEN }}
+\`\`\`
+
+### 4. Enviar un prompt estructurado
+
+\`\`\`typescript
+const prompt = [
+  "Draft release notes for version " + version + ".",
+  "",
+  "Rules:",
+  "- Group changes into Added, Improved, Fixed, Breaking Changes",
+  "- Write for end users, not internal engineers",
+  "- Ignore low-value maintenance work unless user-facing",
+  "- Keep each bullet to one sentence",
+  "",
+  "PR data:",
+  JSON.stringify(prs, null, 2),
+].join("\\n");
+\`\`\`
+
+### 5. Generar el borrador
+
+\`\`\`typescript
+import OpenAI from "openai";
+
+const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+const response = await client.responses.create({
+  model: "gpt-4.1-mini",
+  input: prompt,
+});
+
+console.log(response.output_text);
+\`\`\`
+
+### 6. Guardar el resultado en el draft release
+
+\`\`\`yaml
+- name: Create draft release
+  run: |
+    gh release create \${{ inputs.version }} --draft --notes-file release-notes.md
+  env:
+    GH_TOKEN: \${{ secrets.GITHUB_TOKEN }}
+\`\`\`
+
+### 7. Agregar protecciones de revision
+
+- Requiere revision de un maintainer antes de publicar
+- Excluye PRs con labels \`chore\` o \`internal\`
+- Conserva una plantilla fallback si la salida es debil
+- Registra que PRs entraron en el borrador
+
+## Casos de uso
+
+- Releases de producto
+- Changelogs
+- Actualizaciones a clientes
+- Resumenes para plataformas internas
+
+## Pros y contras
+
+**Pros:**
+- Ahorra tiempo editorial recurrente
+- Produce estructura mas consistente
+- Empuja mejores labels en PRs
+- Encaja con workflows existentes de GitHub
+
+**Contras:**
+- PRs mal descritos producen notas malas
+- Puede exagerar cambios pequenos
+- Sigue requiriendo revision humana
+- Necesita ajustar prompts con el tiempo
+
+## Conclusion
+
+Las release notes automatizadas sirven mas cuando eliminan el trabajo de pagina en blanco. Manten el flujo determinista, el prompt estricto y trata la salida de IA como un borrador.`,
+    },
+    category: "tutorials",
+    tags: ["github-actions", "release-notes", "automation", "ai", "tutorial"],
+    author: "DevAI Team",
+    publishedAt: "2026-04-18",
+    readTime: 2,
+    featured: false,
+    image: "",
+  },
+  {
+    slug: "typescript-llm-evals-from-scratch",
+    title: {
+      en: "How to Build LLM Evals in TypeScript from Scratch",
+      es: "Como construir evals de LLM en TypeScript desde cero",
+    },
+    excerpt: {
+      en: "A hands-on guide to building a lightweight evaluation harness for prompts, model changes, and regression testing in TypeScript.",
+      es: "Una guia practica para crear un sistema ligero de evaluacion para prompts, cambios de modelo y pruebas de regresion en TypeScript.",
+    },
+    content: {
+      en: `## Introduction
+
+If your AI feature is changing every week, intuition is not enough. You need a repeatable way to compare prompts, models, and system behavior before regressions reach users.
+
+In this tutorial, you'll build a lightweight eval harness in TypeScript that scores outputs against a small benchmark set.
+
+## What Are LLM Evals?
+
+LLM evals are structured tests for model behavior. Instead of testing only whether code runs, you test whether the model output still meets your quality bar.
+
+An eval set usually contains:
+
+- An input prompt
+- Expected criteria
+- A scoring rule
+- Optional human notes
+
+## Why It Matters
+
+Without evals, teams often change prompts blindly. A model upgrade might improve one use case while quietly breaking another.
+
+## Step-by-Step Tutorial
+
+### 1. Define the Test Cases
+
+\`\`\`typescript
+type EvalCase = {
+  id: string;
+  input: string;
+  mustInclude: string[];
+  mustNotInclude?: string[];
+};
+
+const cases: EvalCase[] = [
+  {
+    id: "refund-policy",
+    input: "Summarize the refund policy in one paragraph.",
+    mustInclude: ["30 days", "receipt"],
+  },
+];
+\`\`\`
+
+### 2. Generate Model Output
+
+\`\`\`typescript
+import OpenAI from "openai";
+
+const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+async function runPrompt(input: string) {
+  const response = await client.responses.create({
+    model: "gpt-4.1-mini",
+    input,
+  });
+
+  return response.output_text;
+}
+\`\`\`
+
+### 3. Score Each Case
+
+\`\`\`typescript
+function scoreOutput(test: EvalCase, output: string) {
+  const normalized = output.toLowerCase();
+
+  const includes = test.mustInclude.every((rule) =>
+    normalized.includes(rule.toLowerCase())
+  );
+
+  const excludes = (test.mustNotInclude ?? []).every((rule) =>
+    !normalized.includes(rule.toLowerCase())
+  );
+
+  return {
+    pass: includes && excludes,
+    output,
+  };
+}
+\`\`\`
+
+### 4. Run the Full Suite
+
+\`\`\`typescript
+async function main() {
+  const results = [];
+
+  for (const test of cases) {
+    const output = await runPrompt(test.input);
+    results.push({
+      id: test.id,
+      ...scoreOutput(test, output),
+    });
+  }
+
+  console.table(results);
+}
+
+main();
+\`\`\`
+
+### 5. Compare Prompt Versions
+
+- Prompt A: current production prompt
+- Prompt B: proposed revision
+
+### 6. Add a Judge Model Carefully
+
+\`\`\`typescript
+type JudgeScore = {
+  clarity: number;
+  factuality: number;
+  tone: number;
+  notes: string;
+};
+\`\`\`
+
+### 7. Fail CI on Regressions
+
+- Pass rate drops below a threshold
+- A critical scenario fails
+- Output violates a forbidden rule
+
+## Use Cases
+
+- Prompt regression testing
+- Model upgrades
+- Policy enforcement
+- Content quality checks
+
+## Pros and Cons
+
+**Pros:**
+- Makes prompt changes measurable
+- Gives teams a shared quality baseline
+- Easy to run in CI
+- Helps separate regressions from personal preference
+
+**Cons:**
+- Hard to encode every quality dimension
+- Small eval sets can create false confidence
+- Judge-model scoring adds complexity
+- Needs periodic maintenance
+
+## Conclusion
+
+Evals are the missing engineering layer in many AI products. Start simple, write cases from real failures, and keep the benchmark close to user behavior.`,
+      es: `## Introduccion
+
+Si tu feature de IA cambia cada semana, la intuicion no basta. Necesitas una forma repetible de comparar prompts, modelos y comportamiento del sistema antes de que una regresion llegue a usuarios.
+
+En este tutorial vas a construir un harness ligero de evals en TypeScript para puntuar salidas contra un benchmark pequeno.
+
+## Que son las evals de LLM?
+
+Las evals de LLM son pruebas estructuradas del comportamiento del modelo. En lugar de probar solo que el codigo corre, pruebas que la salida del modelo sigue cumpliendo tu nivel de calidad.
+
+Un set de evals suele incluir:
+
+- Un prompt de entrada
+- Criterios esperados
+- Una regla de puntuacion
+- Notas humanas opcionales
+
+## Por que importa
+
+Sin evals, muchos equipos cambian prompts a ciegas. Una actualizacion de modelo puede mejorar un caso y romper otro en silencio.
+
+## Tutorial paso a paso
+
+### 1. Definir casos de prueba
+
+\`\`\`typescript
+type EvalCase = {
+  id: string;
+  input: string;
+  mustInclude: string[];
+  mustNotInclude?: string[];
+};
+
+const cases: EvalCase[] = [
+  {
+    id: "refund-policy",
+    input: "Summarize the refund policy in one paragraph.",
+    mustInclude: ["30 days", "receipt"],
+  },
+];
+\`\`\`
+
+### 2. Generar salida del modelo
+
+\`\`\`typescript
+import OpenAI from "openai";
+
+const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+async function runPrompt(input: string) {
+  const response = await client.responses.create({
+    model: "gpt-4.1-mini",
+    input,
+  });
+
+  return response.output_text;
+}
+\`\`\`
+
+### 3. Puntuar cada caso
+
+\`\`\`typescript
+function scoreOutput(test: EvalCase, output: string) {
+  const normalized = output.toLowerCase();
+
+  const includes = test.mustInclude.every((rule) =>
+    normalized.includes(rule.toLowerCase())
+  );
+
+  const excludes = (test.mustNotInclude ?? []).every((rule) =>
+    !normalized.includes(rule.toLowerCase())
+  );
+
+  return {
+    pass: includes && excludes,
+    output,
+  };
+}
+\`\`\`
+
+### 4. Ejecutar la suite completa
+
+\`\`\`typescript
+async function main() {
+  const results = [];
+
+  for (const test of cases) {
+    const output = await runPrompt(test.input);
+    results.push({
+      id: test.id,
+      ...scoreOutput(test, output),
+    });
+  }
+
+  console.table(results);
+}
+
+main();
+\`\`\`
+
+### 5. Comparar versiones de prompt
+
+- Prompt A: prompt actual de produccion
+- Prompt B: revision propuesta
+
+### 6. Agregar un judge model con cuidado
+
+\`\`\`typescript
+type JudgeScore = {
+  clarity: number;
+  factuality: number;
+  tone: number;
+  notes: string;
+};
+\`\`\`
+
+### 7. Hacer fallar CI en regresiones
+
+- La tasa de aprobacion cae bajo un umbral
+- Falla un escenario critico
+- La salida viola una regla prohibida
+
+## Casos de uso
+
+- Pruebas de regresion para prompts
+- Upgrades de modelo
+- Politicas
+- Calidad de contenido
+
+## Pros y contras
+
+**Pros:**
+- Hace medibles los cambios de prompt
+- Le da al equipo una base compartida de calidad
+- Es facil de correr en CI
+- Ayuda a separar regresiones de preferencia personal
+
+**Contras:**
+- Es dificil capturar toda dimension de calidad
+- Sets pequenos pueden dar falsa confianza
+- Judge models agregan complejidad
+- Requiere mantenimiento periodico
+
+## Conclusion
+
+Las evals son la capa de ingenieria que falta en muchos productos con IA. Empieza simple, escribe casos desde fallas reales y manten el benchmark cerca del comportamiento real del usuario.`,
+    },
+    category: "tutorials",
+    tags: ["typescript", "evals", "llm", "testing", "tutorial"],
+    author: "DevAI Team",
+    publishedAt: "2026-04-18",
+    readTime: 2,
+    featured: false,
+    image: "",
+  },
+  {
+    slug: "build-ai-slack-support-agent",
+    title: {
+      en: "Build an AI Slack Support Agent for Internal Teams",
+      es: "Construye un agente de soporte con IA en Slack",
+    },
+    excerpt: {
+      en: "Create a practical internal Slack assistant that answers team questions, routes requests, and escalates gaps without pretending to know everything.",
+      es: "Crea un asistente interno en Slack que responda preguntas, enrute solicitudes y escale vacios sin fingir que sabe todo.",
+    },
+    content: {
+      en: `## Introduction
+
+Many internal support channels fail for the same reason: the right answers exist, but they are buried across docs, tickets, and tribal knowledge. An AI Slack agent can reduce that friction if it is grounded in real sources and knows when to escalate.
+
+In this tutorial, you'll build an internal support assistant for Slack.
+
+## What Is an Internal AI Support Agent?
+
+It is a bot that:
+
+- Receives a question in Slack
+- Looks up relevant internal knowledge
+- Drafts a concise answer
+- Points to sources
+- Escalates when confidence is low
+
+## Why It Matters
+
+Support load inside companies is expensive. Engineering, IT, HR, and operations teams all answer the same questions repeatedly.
+
+## Step-by-Step Tutorial
+
+### 1. Create the Slack App
+
+Configure bot token scopes, event subscriptions, app mentions, and a slash command or channel trigger.
+
+### 2. Define the Message Pipeline
+
+\`\`\`typescript
+type SupportRequest = {
+  userId: string;
+  channelId: string;
+  text: string;
+  timestamp: string;
+};
+\`\`\`
+
+### 3. Retrieve Context
+
+\`\`\`typescript
+async function buildContext(question: string) {
+  const matches = await searchRelevantChunks(question);
+
+  return matches.map((item) => ({
+    title: item.title,
+    source: item.source,
+    content: item.content,
+  }));
+}
+\`\`\`
+
+### 4. Generate the Response
+
+\`\`\`typescript
+const prompt = [
+  "You are an internal support assistant.",
+  "",
+  "Rules:",
+  "- Use only the provided context",
+  "- If the answer is uncertain, say that clearly",
+  "- Suggest escalation when confidence is low",
+  "- Keep the answer under 150 words",
+].join("\\n");
+\`\`\`
+
+### 5. Add Escalation Logic
+
+\`\`\`typescript
+function shouldEscalate(answer: string, sources: Array<{ source: string }>) {
+  return answer.includes("I am not sure") || sources.length === 0;
+}
+\`\`\`
+
+### 6. Post Back to Slack
+
+\`\`\`typescript
+await slackClient.chat.postMessage({
+  channel: request.channelId,
+  thread_ts: request.timestamp,
+  text: answer,
+});
+\`\`\`
+
+### 7. Track Failures
+
+- Questions with no answer
+- Missing source documents
+- Escalation rate
+- Topics asked repeatedly
+
+## Use Cases
+
+- IT helpdesk
+- Onboarding
+- Ops support
+- Team routing
+
+## Pros and Cons
+
+**Pros:**
+- Reduces repeated internal questions
+- Keeps answers close to documented sources
+- Improves response speed in async channels
+- Generates insights about documentation gaps
+
+**Cons:**
+- Requires source maintenance
+- Slack context can be noisy
+- Poor escalation logic frustrates users
+- Needs clear ownership after deployment
+
+## Conclusion
+
+An internal Slack agent works best when it is honest about uncertainty and disciplined about sources. Build for deflection first, escalation second, and only then expand autonomy.`,
+      es: `## Introduccion
+
+Muchos canales internos de soporte fallan por la misma razon: las respuestas correctas existen, pero estan enterradas entre docs, tickets y conocimiento informal. Un agente de IA en Slack puede reducir esa friccion si esta conectado a fuentes reales y sabe cuando escalar.
+
+En este tutorial vas a construir un asistente interno de soporte para Slack.
+
+## Que es un agente interno de soporte con IA?
+
+Es un bot que:
+
+- Recibe una pregunta en Slack
+- Busca conocimiento interno relevante
+- Redacta una respuesta concisa
+- Muestra fuentes
+- Escala cuando la confianza es baja
+
+## Por que importa
+
+La carga de soporte interno es costosa. Ingenieria, IT, HR y operaciones responden las mismas preguntas una y otra vez.
+
+## Tutorial paso a paso
+
+### 1. Crear la app de Slack
+
+Configura bot token scopes, event subscriptions, app mentions y un slash command o trigger de canal.
+
+### 2. Definir el pipeline de mensajes
+
+\`\`\`typescript
+type SupportRequest = {
+  userId: string;
+  channelId: string;
+  text: string;
+  timestamp: string;
+};
+\`\`\`
+
+### 3. Recuperar contexto
+
+\`\`\`typescript
+async function buildContext(question: string) {
+  const matches = await searchRelevantChunks(question);
+
+  return matches.map((item) => ({
+    title: item.title,
+    source: item.source,
+    content: item.content,
+  }));
+}
+\`\`\`
+
+### 4. Generar la respuesta
+
+\`\`\`typescript
+const prompt = [
+  "You are an internal support assistant.",
+  "",
+  "Rules:",
+  "- Use only the provided context",
+  "- If the answer is uncertain, say that clearly",
+  "- Suggest escalation when confidence is low",
+  "- Keep the answer under 150 words",
+].join("\\n");
+\`\`\`
+
+### 5. Agregar logica de escalacion
+
+\`\`\`typescript
+function shouldEscalate(answer: string, sources: Array<{ source: string }>) {
+  return answer.includes("I am not sure") || sources.length === 0;
+}
+\`\`\`
+
+### 6. Publicar respuesta en Slack
+
+\`\`\`typescript
+await slackClient.chat.postMessage({
+  channel: request.channelId,
+  thread_ts: request.timestamp,
+  text: answer,
+});
+\`\`\`
+
+### 7. Medir fallas
+
+- Preguntas sin respuesta
+- Documentos faltantes
+- Tasa de escalacion
+- Temas repetidos
+
+## Casos de uso
+
+- Mesa de ayuda IT
+- Onboarding
+- Soporte operativo
+- Enrutamiento
+
+## Pros y contras
+
+**Pros:**
+- Reduce preguntas internas repetidas
+- Mantiene respuestas cerca de fuentes documentadas
+- Mejora velocidad en canales asincronos
+- Genera insights sobre huecos de documentacion
+
+**Contras:**
+- Requiere mantenimiento de fuentes
+- El contexto de Slack puede ser ambiguo
+- Mala escalacion frustra usuarios
+- Necesita ownership claro despues del deploy
+
+## Conclusion
+
+Un agente interno en Slack funciona mejor cuando es honesto sobre incertidumbre y disciplinado con fuentes. Construyelo primero para deflexion, luego para escalacion y solo despues expande autonomia.`,
+    },
+    category: "tutorials",
+    tags: ["slack", "support-agent", "automation", "rag", "tutorial"],
+    author: "DevAI Team",
+    publishedAt: "2026-04-18",
+    readTime: 2,
+    featured: false,
+    image: "",
+  },
 ];
 
 export function getPostsByLocale(locale: Locale) {
