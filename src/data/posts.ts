@@ -3392,6 +3392,1354 @@ Comienza con patrones básicos y añade complejidad según sea necesario. ¡La c
     featured: false,
     image: "",
   },
+  // === ARTICLES FOR EACH CATEGORY (5 each) ===
+  // === AI TOOLS (5 total) ===
+  {
+    slug: "claude-code-developer-guide",
+    title: {
+      en: "Complete Guide to Claude Code for Developers",
+      es: "Guía Completa de Claude Code para Developers",
+    },
+    excerpt: {
+      en: "Discover how Claude Code can help you write better code, debug faster, and understand complex codebases.",
+      es: "Descubre cómo Claude Code puede ayudarte a escribir mejor código, debug más rápido y entender bases de código complejas.",
+    },
+    content: {
+      en: `## Introduction
+
+Claude Code is Anthropic's AI assistant specifically designed for software development. Unlike general-purpose chatbots, it's optimized for coding tasks.
+
+## What Makes Claude Code Unique
+
+Claude Code excels at:
+- Deep code understanding
+- Complex reasoning
+- Bug detection
+- Code explanation
+
+## Getting Started
+
+\`\`\`bash
+npm install -g @anthropic-ai/claude-code
+claude init
+\`\`\`
+
+## Practical Usage
+
+### Code Review
+
+\`\`\`bash
+claude review ./src --detailed
+\`\`\`
+
+### Debugging
+
+\`\`\`bash
+claude debug "Error: Cannot read property 'map' of undefined"
+\`\`\`
+
+## Use Cases
+
+- 🔍 Deep code analysis
+- 🐛 Debugging complex issues
+- 📖 Explaining legacy code
+- 💡 Architecture suggestions
+
+## Pros and Cons
+
+**Pros:**
+- ✅ Excellent code understanding
+- ✅ Great for debugging
+- ✅ CLI-first workflow
+
+**Cons:**
+- ❌ No native IDE integration
+- ❌ Requires explicit prompts`,
+      es: `## Introducción
+
+Claude Code es el asistente de IA de Anthropic específicamente diseñado para desarrollo de software. A diferencia de chatbots generales, está optimizado para tareas de código.
+
+## Qué Hace Único a Claude Code
+
+Claude Code sobresale en:
+- Entendimiento profundo de código
+- Razonamiento complejo
+- Detección de bugs
+- Explicación de código
+
+## Primeros Pasos
+
+\`\`\`bash
+npm install -g @anthropic-ai/claude-code
+claude init
+\`\`\`
+
+## Uso Práctico
+
+### Revisión de Código
+
+\`\`\`bash
+claude review ./src --detailed
+\`\`\`
+
+### Debugging
+
+\`\`\`bash
+claude debug "Error: No se puede leer propiedad 'map' de undefined"
+\`\`\`
+
+## Casos de Uso
+
+- 🔍 Análisis profundo de código
+- 🐛 Debugging de problemas complejos
+- 📖 Explicación de código legacy
+- 💡 Sugerencias de arquitectura
+
+## Pros y Contras
+
+**Pros:**
+- ✅ Excelente entendimiento de código
+- ✅ Great for debugging
+- ✅ Flujo de trabajo CLI-first
+
+**Cons:**
+- ❌ Sin integración de IDE nativa
+- ❌ Requiere prompts explícitos`,
+    },
+    category: "ai-tools",
+    tags: ["claude", "ai-tools", "code-assistant", "debugging"],
+    author: "DevAI Team",
+    publishedAt: "2026-04-18",
+    featured: false,
+    image: "",
+  },
+  {
+    slug: "windsurf-vscode-ai",
+    title: {
+      en: "Windsurf: The Flow-State AI Editor",
+      es: "Windsurf: El Editor IA para Estado de Flujo",
+    },
+    excerpt: {
+      en: "Learn about Windsurf, the AI editor designed for uninterrupted coding flow.",
+      es: "Aprende sobre Windsurf, el editor de IA diseñado para flujo de código ininterrumpido.",
+    },
+    content: {
+      en: `## Introduction
+
+Windsurf is an AI-powered code editor built on VS Code that prioritizes flow state over feature complexity.
+
+## Philosophy
+
+Windsurf focuses on:
+- Minimal context switching
+- Quick edits
+- Non-intrusive suggestions
+
+## Key Features
+
+### Flow Mode
+
+\`\`\`typescript
+// Windsurf adapts to your workflow
+// No modal interfaces - just type and go
+\`\`\`
+
+### Quick Actions
+
+- Cmd+K for inline edits
+- Cmd+Shift+K for chat
+- Tab for acceptance
+
+## Use Cases
+
+- ⚡ Quick code edits
+- 🎯 Focused coding sessions
+- 🔄 Iterative development`,
+      es: `## Introducción
+
+Windsurf es un editor de código con IA construido sobre VS Code que prioriza el estado de flujo sobre la complejidad de características.
+
+## Filosofía
+
+Windsurf se enfoca en:
+- Cambio mínimo de contexto
+- Ediciones rápidas
+- Sugerencias no intrusivas
+
+## Features Clave
+
+### Modo Flujo
+
+\`\`\`typescript
+// Windsurf se adapta a tu flujo de trabajo
+// Sin interfaces modales - solo escribe y sigue
+\`\`\`
+
+### Acciones Rápidas
+
+- Cmd+K para ediciones inline
+- Cmd+Shift+K para chat
+- Tab para aceptar
+
+## Casos de Uso
+
+- ⚡ Ediciones rápidas de código
+- 🎯 Sesiones de código enfocadas
+- 🔄 Desarrollo iterativo`,
+    },
+    category: "ai-tools",
+    tags: ["windsurf", "vscode", "ai-tools", "editor"],
+    author: "DevAI Team",
+    publishedAt: "2026-04-18",
+    featured: false,
+    image: "",
+  },
+  {
+    slug: "codeium-free-ai-assistant",
+    title: {
+      en: "Codeium: The Free AI Coding Assistant",
+      es: "Codeium: El Asistente de Código IA Gratis",
+    },
+    excerpt: {
+      en: "Explore Codeium, a free AI coding assistant with strong code completion capabilities.",
+      es: "Explora Codeium, un asistente de código IA gratis con fuertes capacidades de completado.",
+    },
+    content: {
+      en: `## Introduction
+
+Codeium offers AI-powered code completion for free, making it accessible to all developers.
+
+## Features
+
+- Multi-language support
+- Context-aware completions
+- VS Code, JetBrains, and more
+
+## Getting Started
+
+\`\`\`bash
+# Install from VS Code marketplace
+# No API key needed - completely free
+\`\`\`
+
+## Comparison
+
+| Feature | Codeium | Copilot |
+|---------|---------|---------|
+| Price | Free | $10/mo |
+| Languages | 70+ | 70+ |
+| IDE Support | 10+ | 5 |`,
+      es: `## Introducción
+
+Codeium ofrece completado de código con IA gratis, haciéndolo accesible para todos los developers.
+
+## Features
+
+- Soporte multi-lenguaje
+- Completados conscientes del contexto
+- VS Code, JetBrains, y más
+
+## Primeros Pasos
+
+\`\`\`bash
+# Instala desde el marketplace de VS Code
+# No se necesita API key - completamente gratis
+\`\`\`
+
+## Comparación
+
+| Feature | Codeium | Copilot |
+|---------|---------|---------|
+| Precio | Gratis | $10/mes |
+| Lenguajes | 70+ | 70+ |
+| Soporte IDE | 10+ | 5 |`,
+    },
+    category: "ai-tools",
+    tags: ["codeium", "ai-tools", "free", "code-completion"],
+    author: "DevAI Team",
+    publishedAt: "2026-04-18",
+    featured: false,
+    image: "",
+  },
+  {
+    slug: "Tabnine-ai-code-completion",
+    title: {
+      en: "Tabnine: Context-Aware Code Completion",
+      es: "Tabnine: Completado de Código Consciente del Contexto",
+    },
+    excerpt: {
+      en: "Learn how Tabnine uses deep learning to provide context-aware code predictions.",
+      es: "Aprende cómo Tabnine usa deep learning para proporcionar predicciones de código conscientes del contexto.",
+    },
+    content: {
+      en: `## Introduction
+
+Tabnine has been around since 2018 and uses deep learning to predict entire code snippets.
+
+## How It Works
+
+Tabnine analyzes:
+- Current file context
+- Project structure
+- Coding patterns
+
+## Plans
+
+- **Free**: Basic completion
+- **Pro**: Team features, $12/mo
+- **Enterprise**: Custom models`,
+      es: `## Introducción
+
+Tabnine existe desde 2018 y usa deep learning para predecir fragmentos de código completos.
+
+## Cómo Funciona
+
+Tabnine analiza:
+- Contexto del archivo actual
+- Estructura del proyecto
+- Patrones de código
+
+## Planes
+
+- **Gratis**: Completado básico
+- **Pro**: Features de equipo, $12/mes
+- **Empresas**: Modelos personalizados`,
+    },
+    category: "ai-tools",
+    tags: ["tabnine", "ai-tools", "code-completion", "deep-learning"],
+    author: "DevAI Team",
+    publishedAt: "2026-04-18",
+    featured: false,
+    image: "",
+  },
+  // === AUTOMATION (5 total) ===
+  {
+    slug: "github-actions-ai-automation",
+    title: {
+      en: "Automating GitHub Actions with AI",
+      es: "Automatizando GitHub Actions con IA",
+    },
+    excerpt: {
+      en: "Learn how to use AI to create and optimize GitHub Actions workflows.",
+      es: "Aprende cómo usar IA para crear y optimizar flujos de trabajo de GitHub Actions.",
+    },
+    content: {
+      en: `## Introduction
+
+AI can help you create better GitHub Actions workflows faster.
+
+## Creating Workflows with AI
+
+\`\`\`yaml
+# AI can generate this from natural language
+name: CI
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci
+      - run: npm test
+\`\`\`
+
+## AI-Optimized Workflows
+
+AI can suggest:
+- Caching strategies
+- Matrix strategies
+- Parallel execution`,
+      es: `## Introducción
+
+La IA puede ayudarte a crear mejores flujos de trabajo de GitHub Actions más rápido.
+
+## Creando Flujos con IA
+
+\`\`\`yaml
+# La IA puede generar esto desde lenguaje natural
+name: CI
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci
+      - run: npm test
+\`\`\`
+
+## Flujos Optimizados por IA
+
+La IA puede sugerir:
+- Estrategias de cache
+- Estrategias de matriz
+- Ejecución paralela`,
+    },
+    category: "automation",
+    tags: ["automation", "github-actions", "ci-cd", "ai"],
+    author: "DevAI Team",
+    publishedAt: "2026-04-18",
+    featured: false,
+    image: "",
+  },
+  {
+    slug: "ai-powered-git-hooks",
+    title: {
+      en: "AI-Powered Git Hooks for Better Code",
+      es: "Git Hooks Potenciados con IA para Mejor Código",
+    },
+    excerpt: {
+      en: "Use AI in git hooks to automatically review and improve your code.",
+      es: "Usa IA en git hooks para revisar y mejorar automáticamente tu código.",
+    },
+    content: {
+      en: `## Introduction
+
+Git hooks can run AI-powered checks on every commit.
+
+## Setup
+
+\`\`\`bash
+#!/bin/sh
+# .git/hooks/pre-commit
+npm run lint
+npm run test
+# Add AI code review
+npx ai-review --files $(git diff --name-only)
+\`\`\`
+
+## Benefits
+
+- Consistent code quality
+- Automatic style enforcement
+- Early bug detection`,
+      es: `## Introducción
+
+Los git hooks pueden ejecutar checks potenciados con IA en cada commit.
+
+## Configuración
+
+\`\`\`bash
+#!/bin/sh
+# .git/hooks/pre-commit
+npm run lint
+npm run test
+# Agregar revisión de código con IA
+npx ai-review --files $(git diff --name-only)
+\`\`\`
+
+## Beneficios
+
+- Calidad de código consistente
+- Aplicación automática de estilos
+- Detección temprana de bugs`,
+    },
+    category: "automation",
+    tags: ["automation", "git", "hooks", "code-quality"],
+    author: "DevAI Team",
+    publishedAt: "2026-04-18",
+    featured: false,
+    image: "",
+  },
+  {
+    slug: "automated-code-review-ai",
+    title: {
+      en: "Setting Up Automated Code Review with AI",
+      es: "Configurando Revisión Automática de Código con IA",
+    },
+    excerpt: {
+      en: "Create a fully automated code review system using AI in your CI/CD pipeline.",
+      es: "Crea un sistema de revisión de código completamente automatizado usando IA en tu pipeline CI/CD.",
+    },
+    content: {
+      en: `## Introduction
+
+Automated code review catches issues before they reach production.
+
+## Architecture
+
+1. Open Pull Request
+2. CI runs AI review
+3. AI comments on changes
+4. Developer addresses feedback
+
+## Tools
+
+- CodeRabbit
+- CodeClimate
+- GitHub Copilot Review`,
+      es: `## Introducción
+
+La revisión automatizada de código atrapa problemas antes de que lleguen a producción.
+
+## Arquitectura
+
+1. Abrir Pull Request
+2. CI ejecuta revisión con IA
+3. IA comenta en los cambios
+4. Developer addressa feedback
+
+## Herramientas
+
+- CodeRabbit
+- CodeClimate
+- GitHub Copilot Review`,
+    },
+    category: "automation",
+    tags: ["automation", "code-review", "ci-cd", "ai"],
+    author: "DevAI Team",
+    publishedAt: "2026-04-18",
+    featured: false,
+    image: "",
+  },
+  // === PRODUCTIVITY (5 total) ===
+  {
+    slug: "ai-meeting-notes-automation",
+    title: {
+      en: "AI-Powered Meeting Notes and Documentation",
+      es: "Notas de Reunión y Documentación Potenciadas con IA",
+    },
+    excerpt: {
+      en: "Automate your meeting notes and documentation with AI transcription and summarization.",
+      es: "Automatiza tus notas de reunión y documentación con transcripción y resumen de IA.",
+    },
+    content: {
+      en: `## Introduction
+
+AI can transcribe and summarize your meetings automatically.
+
+## Tools
+
+- Ottery
+- Fireflies
+- Notion AI
+
+## Workflow
+
+1. Join meeting with AI bot
+2. AI transcribes everything
+3. AI generates summary
+4. Action items extracted`,
+      es: `## Introducción
+
+La IA puede transcribir y resumir tus reuniones automáticamente.
+
+## Herramientas
+
+- Ottery
+- Fireflies
+- Notion AI
+
+## Flujo
+
+1. Únete a la reunión con bot de IA
+2. IA transcribe todo
+3. IA genera resumen
+4. Action items extraídos`,
+    },
+    category: "productivity",
+    tags: ["productivity", "meetings", "documentation", "ai"],
+    author: "DevAI Team",
+    publishedAt: "2026-04-18",
+    featured: false,
+    image: "",
+  },
+  {
+    slug: "ai-sprint-planning",
+    title: {
+      en: "AI-Assisted Sprint Planning",
+      es: "Planificación de Sprint Asistida por IA",
+    },
+    excerpt: {
+      en: "Use AI to estimate story points and plan sprints more effectively.",
+      es: "Usa IA para estimar story points y planificar sprints más efectivamente.",
+    },
+    content: {
+      en: `## Introduction
+
+AI can help with sprint planning by analyzing past velocity and ticket complexity.
+
+## How It Works
+
+1. Input previous sprint data
+2. AI analyzes patterns
+3. AI suggests estimates
+4. Team adjusts as needed
+
+## Tools
+
+- Linear
+- Jira with AI plugins
+- Custom ML models`,
+      es: `## Introducción
+
+La IA puede ayudar con la planificación de sprints analizando velocidad pasada y complejidad de tickets.
+
+## Cómo Funciona
+
+1. Ingresa datos de sprint anterior
+2. IA analiza patrones
+3. IA sugiere estimaciones
+4. Equipo ajusta según sea necesario
+
+## Herramientas
+
+- Linear
+- Jira con plugins de IA
+- Modelos ML personalizados`,
+    },
+    category: "productivity",
+    tags: ["productivity", "sprint", "planning", "agile"],
+    author: "DevAI Team",
+    publishedAt: "2026-04-18",
+    featured: false,
+    image: "",
+  },
+  {
+    slug: "ai-documentation-generator",
+    title: {
+      en: "Automated API Documentation with AI",
+      es: "Documentación de API Automatizada con IA",
+    },
+    excerpt: {
+      en: "Generate and maintain API documentation automatically using AI.",
+      es: "Genera y mantén documentación de API automáticamente usando IA.",
+    },
+    content: {
+      en: `## Introduction
+
+Keep your documentation in sync with your code using AI.
+
+## Tools
+
+- Swagger/OpenAI integration
+- Docusaurus with AI plugins
+- Mintlify
+
+## Workflow
+
+1. Write code with docstrings
+2. AI generates full docs
+3. CI validates docs match code
+4. Auto-deploy updates`,
+      es: `## Introducción
+
+Mantén tu documentación en sync con tu código usando IA.
+
+## Herramientas
+
+- Integración Swagger/OpenAI
+- Docusaurus con plugins de IA
+- Mintlify
+
+## Flujo
+
+1. Escribe código con docstrings
+2. IA genera docs completas
+3. CI valida que docs coincidan con código
+4. Auto-deploy de actualizaciones`,
+    },
+    category: "productivity",
+    tags: ["productivity", "documentation", "api", "automation"],
+    author: "DevAI Team",
+    publishedAt: "2026-04-18",
+    featured: false,
+    image: "",
+  },
+  {
+    slug: "ai-test-generation",
+    title: {
+      en: "AI-Powered Test Generation Strategies",
+      es: "Estrategias de Generación de Tests con IA",
+    },
+    excerpt: {
+      en: "Learn how to use AI to generate comprehensive test suites efficiently.",
+      es: "Aprende cómo usar IA para generar suites de tests completas eficientemente.",
+    },
+    content: {
+      en: `## Introduction
+
+AI can significantly speed up test creation.
+
+## Strategies
+
+1. **Unit Tests**: AI generates from function signatures
+2. **Integration Tests**: AI understands API flows
+3. **E2E Tests**: AI records user flows
+
+## Tools
+
+- Jest with AI
+- Playwright with AI
+- GitHub Copilot Tests`,
+      es: `## Introducción
+
+La IA puede acelerar significativamente la creación de tests.
+
+## Estrategias
+
+1. **Tests Unitarios**: IA genera desde firmas de funciones
+2. **Tests de Integración**: IA entiende flujos de API
+3. **Tests E2E**: IA graba flujos de usuario
+
+## Herramientas
+
+- Jest con IA
+- Playwright con IA
+- GitHub Copilot Tests`,
+    },
+    category: "productivity",
+    tags: ["productivity", "testing", "automation", "ai"],
+    author: "DevAI Team",
+    publishedAt: "2026-04-18",
+    featured: false,
+    image: "",
+  },
+  // === GUIDES (5 total) ===
+  {
+    slug: "ai-security-best-practices",
+    title: {
+      en: "AI Security Best Practices for Developers",
+      es: "Mejores Prácticas de Seguridad IA para Developers",
+    },
+    excerpt: {
+      en: "Understand the security implications of using AI in your applications.",
+      es: "Entiende las implicaciones de seguridad de usar IA en tus aplicaciones.",
+    },
+    content: {
+      en: `## Introduction
+
+AI introduces new security considerations every developer should understand.
+
+## Key Concerns
+
+- Data privacy
+- Prompt injection
+- Model manipulation
+- API security
+
+## Best Practices
+
+1. Validate all AI inputs
+2. Sanitize outputs before use
+3. Rotate API keys regularly
+4. Monitor for anomalies`,
+      es: `## Introducción
+
+La IA introduce nuevas consideraciones de seguridad que todo developer debe entender.
+
+## Preocupaciones Clave
+
+- Privacidad de datos
+- Inyección de prompts
+- Manipulación de modelos
+- Seguridad de API
+
+## Mejores Prácticas
+
+1. Valida todas las entradas de IA
+2. Sanitiza outputs antes de usar
+3. Rota API keys regularmente
+4. Monitorea anomalías`,
+    },
+    category: "guides",
+    tags: ["guides", "security", "ai", "best-practices"],
+    author: "DevAI Team",
+    publishedAt: "2026-04-18",
+    featured: false,
+    image: "",
+  },
+  {
+    slug: "ai-cost-optimization-guide",
+    title: {
+      en: "Complete Guide to Optimizing AI Costs",
+      es: "Guía Completa para Optimizar Costos de IA",
+    },
+    excerpt: {
+      en: "Learn strategies to reduce your AI API costs without sacrificing quality.",
+      es: "Aprende estrategias para reducir tus costos de API de IA sin sacrificar calidad.",
+    },
+    content: {
+      en: `## Introduction
+
+AI API costs can add up quickly. Here's how to optimize.
+
+## Cost Factors
+
+- Token count
+- Model selection
+- Request frequency
+- Caching strategies
+
+## Optimization Tips
+
+1. Use smaller models when possible
+2. Cache frequent queries
+3. Batch requests
+4. Monitor usage closely`,
+      es: `## Introducción
+
+Los costos de API de IA pueden acumularse rápidamente. Aquí te dice cómo optimizar.
+
+## Factores de Costo
+
+- Conteo de tokens
+- Selección de modelo
+- Frecuencia de requests
+- Estrategias de cache
+
+## Tips de Optimización
+
+1. Usa modelos más pequeños cuando sea posible
+2. Cache queries frecuentes
+3. Agrupa requests
+4. Monitorea uso de cerca`,
+    },
+    category: "guides",
+    tags: ["guides", "cost-optimization", "ai", "budget"],
+    author: "DevAI Team",
+    publishedAt: "2026-04-18",
+    featured: false,
+    image: "",
+  },
+  // === MACHINE LEARNING (5 total) ===
+  {
+    slug: "python-ml-basics-developers",
+    title: {
+      en: "Machine Learning Basics for Developers",
+      es: "Fundamentos de Machine Learning para Developers",
+    },
+    excerpt: {
+      en: "A practical introduction to ML concepts every developer should know.",
+      es: "Una introducción práctica a conceptos de ML que todo developer debería conocer.",
+    },
+    content: {
+      en: `## Introduction
+
+Machine learning is transforming software development. Here's what you need to know.
+
+## Core Concepts
+
+- **Supervised Learning**: Training with labeled data
+- **Unsupervised Learning**: Finding patterns in raw data
+- **Neural Networks**: Inspired by biological neurons
+
+## Your First Model
+
+\`\`\`python
+from sklearn.ensemble import RandomForestClassifier
+
+# Simple classification
+model = RandomForestClassifier()
+model.fit(X_train, y_train)
+predictions = model.predict(X_test)
+\`\`\`
+
+## Common Frameworks
+
+- TensorFlow
+- PyTorch
+- Scikit-learn`,
+      es: `## Introducción
+
+El machine learning está transformando el desarrollo de software. Esto es lo que necesitas saber.
+
+## Conceptos Core
+
+- **Aprendizaje Supervisado**: Entrenamiento con datos etiquetados
+- **Aprendizaje No Supervisado**: Encontrar patrones en datos crudos
+- **Redes Neuronales**: Inspiradas en neuronas biológicas
+
+## Tu Primer Modelo
+
+\`\`\`python
+from sklearn.ensemble import RandomForestClassifier
+
+# Clasificación simple
+model = RandomForestClassifier()
+model.fit(X_train, y_train)
+predictions = model.predict(X_test)
+\`\`\`
+
+## Frameworks Comunes
+
+- TensorFlow
+- PyTorch
+- Scikit-learn`,
+    },
+    category: "machine-learning",
+    tags: ["machine-learning", "python", "basics", "tutorial"],
+    author: "DevAI Team",
+    publishedAt: "2026-04-18",
+    featured: false,
+    image: "",
+  },
+  {
+    slug: "fine-tuning-llms-guide",
+    title: {
+      en: "Complete Guide to Fine-Tuning LLMs",
+      es: "Guía Completa para Fine-Tuning de LLMs",
+    },
+    excerpt: {
+      en: "Learn how to customize pre-trained language models for your specific needs.",
+      es: "Aprende cómo personalizar modelos de lenguaje pre-entrenados para tus necesidades específicas.",
+    },
+    content: {
+      en: `## Introduction
+
+Fine-tuning lets you adapt LLMs to your domain.
+
+## When to Fine-Tune
+
+- Domain-specific vocabulary
+- Custom output format
+- Specialized tasks
+
+## Options
+
+1. **LoRA**: Low-rank adaptation
+2. **QLoRA**: Quantized LoRA
+3. **Full fine-tuning**: Update all parameters
+
+## Tools
+
+- Hugging Face Transformers
+- LangChain
+- Axolotl`,
+      es: `## Introducción
+
+Fine-tuning te permite adaptar LLMs a tu dominio.
+
+## Cuándo Hacer Fine-Tuning
+
+- Vocabulario específico del dominio
+- Formato de salida personalizado
+- Tareas especializadas
+
+## Opciones
+
+1. **LoRA**: Adaptación de bajo rango
+2. **QLoRA**: LoRA cuantizado
+3. **Fine-tuning completo**: Actualizar todos los parámetros
+
+## Herramientas
+
+- Hugging Face Transformers
+- LangChain
+- Axolotl`,
+    },
+    category: "machine-learning",
+    tags: ["machine-learning", "llm", "fine-tuning", "huggingface"],
+    author: "DevAI Team",
+    publishedAt: "2026-04-18",
+    featured: false,
+    image: "",
+  },
+  {
+    slug: "vector-databases-guide",
+    title: {
+      en: "Vector Databases for AI Applications",
+      es: "Bases de Datos Vectoriales para Aplicaciones de IA",
+    },
+    excerpt: {
+      en: "Understand vector databases and how to use them for semantic search.",
+      es: "Entiende las bases de datos vectoriales y cómo usarlas para búsqueda semántica.",
+    },
+    content: {
+      en: `## Introduction
+
+Vector databases power semantic search and AI applications.
+
+## What Are Vectors?
+
+Mathematical representations of data (text, images, etc.)
+
+## Popular Databases
+
+- Pinecone
+- Weaviate
+- Chroma
+- Milvus
+
+## Use Cases
+
+- Semantic search
+- Recommendation systems
+- RAG applications`,
+      es: `## Introducción
+
+Las bases de datos vectoriales potencian búsqueda semántica y aplicaciones de IA.
+
+## ¿Qué Son los Vectores?
+
+Representaciones matemáticas de datos (texto, imágenes, etc.)
+
+## Bases de Datos Populares
+
+- Pinecone
+- Weaviate
+- Chroma
+- Milvus
+
+## Casos de Uso
+
+- Búsqueda semántica
+- Sistemas de recomendación
+- Aplicaciones RAG`,
+    },
+    category: "machine-learning",
+    tags: ["machine-learning", "vector-database", "semantic-search", "ai"],
+    author: "DevAI Team",
+    publishedAt: "2026-04-18",
+    featured: false,
+    image: "",
+  },
+  {
+    slug: "rag-applications-tutorial",
+    title: {
+      en: "Building RAG Applications from Scratch",
+      es: "Construyendo Aplicaciones RAG desde Cero",
+    },
+    excerpt: {
+      en: "Learn to build Retrieval-Augmented Generation applications for your data.",
+      es: "Aprende a construir aplicaciones de Retrieval-Augmented Generation para tus datos.",
+    },
+    content: {
+      en: `## Introduction
+
+RAG combines LLMs with your own data for accurate, contextual responses.
+
+## Architecture
+
+1. **Ingestion**: Split docs, create embeddings
+2. **Retrieval**: Find relevant context
+3. **Generation**: Generate with context
+
+## Implementation
+
+\`\`\`python
+from langchain import VectorDBQA
+from langchain.embeddings import OpenAIEmbeddings
+
+chain = VectorDBQA.from_vectorstore(
+    vectorstore,
+    llm,
+    k=5
+)
+result = chain.run(query)
+\`\`\``,
+      es: `## Introducción
+
+RAG combina LLMs con tus propios datos para respuestas precisas y contextuales.
+
+## Arquitectura
+
+1. **Ingesta**: Divide docs, crea embeddings
+2. **Recuperación**: Encuentra contexto relevante
+3. **Generación**: Genera con contexto
+
+## Implementación
+
+\`\`\`python
+from langchain import VectorDBQA
+from langchain.embeddings import OpenAIEmbeddings
+
+chain = VectorDBQA.from_vectorstore(
+    vectorstore,
+    llm,
+    k=5
+)
+result = chain.run(query)
+\`\`\``,
+    },
+    category: "machine-learning",
+    tags: ["machine-learning", "rag", "llm", "tutorial"],
+    author: "DevAI Team",
+    publishedAt: "2026-04-18",
+    featured: false,
+    image: "",
+  },
+  // === APIs (5 total) ===
+  {
+    slug: "anthropic-api-guide",
+    title: {
+      en: "Complete Guide to Anthropic Claude API",
+      es: "Guía Completa de la API de Anthropic Claude",
+    },
+    excerpt: {
+      en: "Learn how to integrate Claude API into your applications.",
+      es: "Aprende cómo integrar la API de Claude en tus aplicaciones.",
+    },
+    content: {
+      en: `## Introduction
+
+Anthropic's Claude API offers powerful AI capabilities.
+
+## Getting Started
+
+\`\`\`bash
+pip install anthropic
+export ANTHROPIC_API_KEY="your-key"
+\`\`\`
+
+## Basic Usage
+
+\`\`\`python
+import anthropic
+
+client = anthropic.Anthropic()
+response = client.messages.create(
+    model="claude-3-5-sonnet-20241022",
+    max_tokens=1024,
+    messages=[{"role": "user", "content": "Hello"}]
+)
+\`\`\`
+
+## Key Features
+
+- Large context window
+- Strong reasoning
+- Safe by design`,
+      es: `## Introducción
+
+La API de Claude de Anthropic ofrece capacidades poderosas de IA.
+
+## Primeros Pasos
+
+\`\`\`bash
+pip install anthropic
+export ANTHROPIC_API_KEY="tu-clave"
+\`\`\`
+
+## Uso Básico
+
+\`\`\`python
+import anthropic
+
+client = anthropic.Anthropic()
+response = client.messages.create(
+    model="claude-3-5-sonnet-20241022",
+    max_tokens=1024,
+    messages=[{"role": "user", "content": "Hola"}]
+)
+\`\`\`
+
+## Features Clave
+
+- Gran ventana de contexto
+- Fuerte razonamiento
+- Seguro por diseño`,
+    },
+    category: "apis",
+    tags: ["api", "anthropic", "claude", "integration"],
+    author: "DevAI Team",
+    publishedAt: "2026-04-18",
+    featured: false,
+    image: "",
+  },
+  {
+    slug: "google-gemini-api",
+    title: {
+      en: "Google Gemini API Integration Guide",
+      es: "Guía de Integración de Google Gemini API",
+    },
+    excerpt: {
+      en: "Learn to use Google's Gemini models in your applications.",
+      es: "Aprende a usar los modelos de Google Gemini en tus aplicaciones.",
+    },
+    content: {
+      en: `## Introduction
+
+Gemini offers multimodal AI capabilities with Google's infrastructure.
+
+## Setup
+
+\`\`\`bash
+pip install google-generativeai
+\`\`\`
+
+## Usage
+
+\`\`\`python
+import google.generativeai as genai
+
+model = genai.GenerativeModel('gemini-pro')
+response = model.generate_content("Hello")
+\`\`\`
+
+## Features
+
+- Multimodal (text, image, video)
+- Fast inference
+- Competitive pricing`,
+      es: `## Introducción
+
+Gemini ofrece capacidades multimodal de IA con la infraestructura de Google.
+
+## Configuración
+
+\`\`\`bash
+pip install google-generativeai
+\`\`\`
+
+## Uso
+
+\`\`\`python
+import google.generativeai as genai
+
+model = genai.GenerativeModel('gemini-pro')
+response = model.generate_content("Hola")
+\`\`\`
+
+## Features
+
+- Multimodal (texto, imagen, video)
+- Inferencia rápida
+- Precios competitivos`,
+    },
+    category: "apis",
+    tags: ["api", "google", "gemini", "multimodal"],
+    author: "DevAI Team",
+    publishedAt: "2026-04-18",
+    featured: false,
+    image: "",
+  },
+  {
+    slug: "azure-openai-enterprise",
+    title: {
+      en: "Azure OpenAI for Enterprise Applications",
+      es: "Azure OpenAI para Aplicaciones Empresariales",
+    },
+    excerpt: {
+      en: "Use Azure's enterprise-ready OpenAI integration for your business.",
+      es: "Usa la integración de OpenAI lista para empresas de Azure para tu negocio.",
+    },
+    content: {
+      en: `## Introduction
+
+Azure OpenAI provides enterprise features like compliance and security.
+
+## Benefits
+
+- Enterprise compliance (SOC 2, HIPAA)
+- Private networking
+- Managed identity
+
+## Setup
+
+\`\`\`python
+from azure.ai.openai import OpenAIClient
+
+client = OpenAIClient(
+    endpoint="https://your-resource.openai.azure.com/",
+    credential=AzureKeyCredential("your-key")
+)
+\`\`\``,
+      es: `## Introducción
+
+Azure OpenAI proporciona features empresariales como compliance y seguridad.
+
+## Beneficios
+
+- Compliance empresarial (SOC 2, HIPAA)
+- Redes privadas
+- Identidad administrada
+
+## Configuración
+
+\`\`\`python
+from azure.ai.openai import OpenAIClient
+
+client = OpenAIClient(
+    endpoint="https://tu-resource.openai.azure.com/",
+    credential=AzureKeyCredential("tu-clave")
+)
+\`\`\``,
+    },
+    category: "apis",
+    tags: ["api", "azure", "openai", "enterprise"],
+    author: "DevAI Team",
+    publishedAt: "2026-04-18",
+    featured: false,
+    image: "",
+  },
+  {
+    slug: "replicate-api-llm-deployment",
+    title: {
+      en: "Deploying LLMs with Replicate API",
+      es: "Desplegando LLMs con la API de Replicate",
+    },
+    excerpt: {
+      en: "Learn to easily deploy and run open-source LLMs using Replicate.",
+      es: "Aprende a desplegar y ejecutar fácilmente LLMs de código abierto usando Replicate.",
+    },
+    content: {
+      en: `## Introduction
+
+Replicate makes running open-source models easy.
+
+## Popular Models
+
+- Llama 3
+- Mistral
+- Stable Diffusion
+
+## Usage
+
+\`\`\`python
+import replicate
+
+output = replicate.run(
+    "meta/llama-3-70b-instruct",
+    input={"prompt": "Hello!"}
+)
+\`\`\`
+
+## Why Replicate?
+
+- No infrastructure management
+- Pay per second
+- Large model library`,
+      es: `## Introducción
+
+Replicate hace fácil ejecutar modelos de código abierto.
+
+## Modelos Populares
+
+- Llama 3
+- Mistral
+- Stable Diffusion
+
+## Uso
+
+\`\`\`python
+import replicate
+
+output = replicate.run(
+    "meta/llama-3-70b-instruct",
+    input={"prompt": "¡Hola!"}
+)
+\`\`\`
+
+## ¿Por qué Replicate?
+
+- Sin gestión de infraestructura
+- Paga por segundo
+- Gran biblioteca de modelos`,
+    },
+    category: "apis",
+    tags: ["api", "replicate", "llm", "deployment"],
+    author: "DevAI Team",
+    publishedAt: "2026-04-18",
+    featured: false,
+    image: "",
+  },
 ];
 
 export function getPostsByLocale(locale: Locale) {
