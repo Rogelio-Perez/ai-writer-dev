@@ -643,6 +643,12 @@ Comienza con un tip, domínalo y agrega más. El efecto compuesto de pequeñas g
   },
 ];
 
+export function calculateReadTime(content: string): number {
+  const wordsPerMinute = 200;
+  const words = content.trim().split(/\s+/).length;
+  return Math.max(1, Math.ceil(words / wordsPerMinute));
+}
+
 export function getPostsByLocale(locale: Locale) {
   return posts.map((post) => ({
     ...post,
