@@ -1,4 +1,5 @@
 import { Locale } from "@/lib/i18n";
+import { getReadingTime } from "@/lib/utils";
 
 export interface BlogPost {
   slug: string;
@@ -9,7 +10,6 @@ export interface BlogPost {
   tags: string[];
   author: string;
   publishedAt: string;
-  readTime: number;
   featured: boolean;
   image: string;
 }
@@ -1303,18 +1303,13 @@ La mejor manera de aprender es construyendo. Comienza con implementaciones simpl
   },
 ];
 
-export function calculateReadTime(content: string): number {
-  const wordsPerMinute = 200;
-  const words = content.trim().split(/\s+/).length;
-  return Math.max(1, Math.ceil(words / wordsPerMinute));
-}
-
 export function getPostsByLocale(locale: Locale) {
   return posts.map((post) => ({
     ...post,
     title: post.title[locale],
     excerpt: post.excerpt[locale],
     content: post.content[locale],
+    readTime: getReadingTime(post.content[locale]),
   }));
 }
 

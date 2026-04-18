@@ -30,14 +30,14 @@ Generate a complete blog article in **{{LANGUAGE}}** about **{{TOPIC}}**.
 5. **Tone**: Professional but approachable, developer-focused
 
 ### Output Format:
-
 Return JSON with:
-
 - title: { en: "...", es: "..." }
 - excerpt: { en: "...", es: "..." }
 - content: { en: "...", es: "..." }
 - tags: [...]
 - category: "..."
+
+**Note**: Do not include `readTime` - it will be calculated automatically based on the content length (approximately 200 words per minute).
 
 ---
 
