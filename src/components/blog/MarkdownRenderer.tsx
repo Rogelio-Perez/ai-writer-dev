@@ -23,6 +23,7 @@ function parseMarkdown(md: string): string {
   // Headers
   html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
   html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+  html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
 
   // Bold and italic
   html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
@@ -49,7 +50,7 @@ function parseMarkdown(md: string): string {
 
 export function extractHeadings(content: string): { id: string; text: string; level: number }[] {
   const headings: { id: string; text: string; level: number }[] = [];
-  const regex = /^(#{2,3}) (.+)$/gm;
+  const regex = /^(#{1,3}) (.+)$/gm;
   let match;
   while ((match = regex.exec(content)) !== null) {
     const text = match[2];
@@ -63,7 +64,7 @@ export default function MarkdownRenderer({ content }: { content: string }) {
   const html = useMemo(() => {
     let processed = parseMarkdown(content);
     // Add IDs to headings for TOC linking
-    processed = processed.replace(/<h([23])>(.+?)<\/h[23]>/g, (_, level, text) => {
+    processed = processed.replace(/<h([123])>(.+?)<\/h[123]>/g, (_, level, text) => {
       const id = text.replace(/<[^>]+>/g, "").toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-");
       return `<h${level} id="${id}">${text}</h${level}>`;
     });

@@ -7203,10 +7203,499 @@ Con esto tendrás una base sólida y extensible: cambia proveedor de embeddings,
     tags: ["next.js","pgvector","postgresql","vectors","embeddings","ai-knowledge-base"],
     author: "DevAI Team",
     publishedAt: "2026-04-18",
-    readTime: 4,
-    featured: false,
+readTime: 4,
+    featured: true,
     image: "/articles/ai-knowledge-base-nextjs-pgvector.png",
     imagePrompt: "Create a horizontal editorial hero illustration for a modern developer blog. Use a restrained visual system aligned to the site design: crisp white or light neutral background, deep charcoal shadows, and green accent lighting close to emerald terminal green. Compose the scene with one clear technical focal point related to building an AI knowledge base with vectors—e.g., an abstract vector grid or a stylized stack showing a database panel and a code terminal represented as clean geometric blocks. Add subtle supporting abstract shapes, soft grid lines, and panel-like geometry suggesting rows of data or embeddings. Use clean depth, soft gradients, elegant contrast, and intentional negative space so headlines could sit on top if needed. Style should feel premium, minimal, sharp, and consistent across articles. Do not include logos, brand marks, screenshots, UI chrome, watermarks, or readable text inside the image. Avoid cartoonish styles, stock-photo look, random colors, busy scenes, and inconsistent visual metaphors.",
+  },
+  {
+    slug: "real-time-readerstreaming-apis",
+    title: {
+      en: "Real-time Data Reader for Developers with Streaming APIs",
+      es: "Lector de Datos en Tiempo Real para Desarrolladores con APIs Streaming",
+    },
+    excerpt: {
+      en: "Real-time data reader with streaming APIs (SSE, WebSockets, chunked HTTP). Step-by-step code, reconnection, ndjson parsing, and production best practices.",
+      es: "Lector de datos en tiempo real con APIs streaming (SSE, WebSockets, HTTP chunked). Tutorial paso a paso, código, reconexión, parsing ndjson y buenas prácticas.",
+    },
+    content: {
+      en: `# Introduction
+
+Modern applications increasingly rely on continuous data: logs, metrics, telemetry, chat, or financial ticks. A real-time data reader consumes streaming APIs to deliver low-latency updates to services and UIs. This article explains what a streaming data reader is, why it matters, and shows practical, production-ready patterns for SSE, WebSockets, and chunked HTTP streams with code examples and operational guidance.
+
+## What is it
+
+A real-time data reader is a client component (or library) that connects to a streaming data source and incrementally consumes messages or events as they arrive. Streaming APIs deliver data over a persistent connection instead of discrete request/response cycles. Common protocols:
+
+- Server-Sent Events (SSE): simple HTTP-based uni-directional event stream.
+- WebSockets: full-duplex socket over HTTP, suitable for bi-directional data.
+- Chunked HTTP / Transfer-Encoding: chunked responses that emit pieces of a body (often ndjson, CSV, or custom framing).
+- gRPC streams and other binary protocols (not covered in depth here).
+
+## Why it matters
+
+- Low latency: clients receive updates as soon as they're available.
+- Efficiency: avoid polling; fewer requests and lower overhead.
+- Backpressure & flow control: streaming protocols can provide smoother resource usage.
+- User experience: live dashboards, chat, collaborative apps, and financial apps require streaming.
+
+## Step-by-step tutorial
+
+We will cover client-side readers (Node.js and Python) and a minimal SSE server example. Focus: connecting, parsing ndjson, handling reconnection, backpressure considerations, and error handling.
+
+### 1) Minimal SSE server (Node.js)
+
+This Express example emits an event every second. Use for local testing.
+
+\`\`\`js
+// server-sse.js
+const express = require('express');
+const app = express();
+
+app.get('/events', (req, res) => {
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.flushHeaders();
+
+  let id = 0;
+  const timer = setInterval(() => {
+    const payload = { id: id++, time: new Date().toISOString() };
+    res.write(\`data: \${JSON.stringify(payload)}\\n\\n\`);
+  }, 1000);
+
+  req.on('close', () => {
+    clearInterval(timer);
+  });
+});
+
+app.listen(3000, () => console.log('SSE server running on http://localhost:3000/events'));
+\`\`\`
+
+### 2) Node.js: reading a chunked or ndjson HTTP stream (fetch + streams)
+
+Node (18+) and browsers expose ReadableStream. Use streaming fetch to parse ndjson line-by-line.
+
+\`\`\`js
+// client-ndjson.js (Node 18+)
+import fetch from 'node-fetch'; // or built-in fetch in Node 18+
+
+async function readNdjson(url) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(\`HTTP \${res.status}\`);
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    let lines = buffer.split('\\n');
+    buffer = lines.pop(); // last incomplete line
+    for (const line of lines) {
+      if (!line.trim()) continue;
+      try {
+        const obj = JSON.parse(line);
+        // process obj
+        console.log('event', obj);
+      } catch (err) {
+        console.warn('parse error', err, line);
+      }
+    }
+  }
+
+  if (buffer.trim()) {
+    try { console.log('final', JSON.parse(buffer)); } catch (e) { }
+  }
+}
+
+readNdjson('https://example.com/stream');
+\`\`\`
+
+Notes:
+- ndjson (newline-delimited JSON) is popular for chunked streams.
+- Use stream-aware parsers for higher throughput (e.g., event-stream libraries).
+
+### 3) Browser SSE client (EventSource)
+
+SSE is the simplest for server-to-client streams in browsers.
+
+\`\`\`js
+// browser-sse.js
+const es = new EventSource('https://example.com/events');
+
+es.onmessage = (e) => {
+  try {
+    const data = JSON.parse(e.data);
+    console.log('sse', data);
+  } catch (err) {
+    console.warn('sse parse', err);
+  }
+};
+
+es.onerror = (err) => {
+  console.error('SSE error', err);
+  // EventSource will auto-reconnect; you can close and recreate if needed
+};
+\`\`\`
+
+### 4) WebSocket client (Node.js)
+
+Use WebSockets for bi-directional needs and low-latency messaging.
+
+\`\`\`js
+// ws-client.js
+import WebSocket from 'ws';
+const ws = new WebSocket('wss://example.com/ws');
+
+ws.on('open', () => {
+  console.log('open');
+  ws.send(JSON.stringify({ type: 'subscribe', channel: 'ticks' }));
+});
+
+ws.on('message', (msg) => {
+  try {
+    const data = JSON.parse(msg.toString());
+    console.log('ws', data);
+  } catch (err) {
+    console.warn('ws parse', err);
+  }
+});
+
+ws.on('close', () => console.log('closed'));
+ws.on('error', (err) => console.error('ws error', err));
+\`\`\`
+
+### 5) Python asyncio chunked reader (aiohttp)
+
+Example reading an ndjson stream using aiohttp with incremental parsing.
+
+\`\`\`py
+# client_asyncio.py
+import aiohttp
+import asyncio
+
+async def read_ndjson(url):
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            buffer = ''
+            async for chunk, _ in resp.content.iter_chunks():
+                text = chunk.decode('utf-8')
+                buffer += text
+                lines = buffer.split('\\n')
+                buffer = lines.pop()
+                for line in lines:
+                    if not line.strip():
+                        continue
+                    try:
+                        obj = json.loads(line)
+                        print('event', obj)
+                    except Exception as e:
+                        print('parse error', e)
+            if buffer.strip():
+                try:
+                    print('final', json.loads(buffer))
+                except:
+                    pass
+
+asyncio.run(read_ndjson('https://example.com/stream'))
+\`\`\`
+
+### Reconnection and resilience
+
+- Exponential backoff with jitter on disconnects.
+- Use last-seen message IDs (if API supports) to resume without data loss.
+- Distinguish transient network errors from terminal server errors (4xx).
+- For SSE: the EventSource auto-reconnects; combine with server-side last-event-id header.
+- For WebSockets: implement ping/pong, heartbeat, and automatic reconnect with state reconciliation.
+
+### Backpressure and flow control
+
+- If your consumer is slower than the producer, buffer growth can exhaust memory. Strategies:
+  - Apply bounded queues and drop/compact old messages.
+  - Use streaming transforms and incremental processing.
+  - If server supports it, use per-connection flow control or request smaller batch sizes.
+
+### Security and production practices
+
+- Use TLS (https/wss).
+- Authenticate over the initial handshake (HTTP headers, cookies, tokens) and rotate tokens.
+- Rate-limit and monitor connections per client.
+- Sanitize and validate incoming data; do not eval untrusted content.
+
+## Use Cases
+
+- Live dashboards (metrics, monitoring).
+- Chat and collaboration apps.
+- Financial tickers and trading feeds.
+- Telemetry and logs pipelines.
+- Long-running APIs that stream results progressively (e.g., ML inference).
+
+## Pros and Cons
+
+Pros:
+
+- Low latency and efficient network usage.
+- Real-time user experiences and timely reactions.
+- Reduced overhead vs polling.
+
+Cons:
+
+- Complexity: reconnection, ordering, deduplication, and backpressure.
+- Operational challenges: long-lived connections and connection limits.
+- Some protocols (SSE) are uni-directional; others need more infrastructure.
+
+## Conclusion
+
+Implementing a real-time data reader means picking the right transport (SSE, WebSockets, chunked HTTP) for your use case and designing for resilience: incremental parsing, bounded buffers, reconnection strategies, and secure transport. Start with a minimal client that parses ndjson or SSE, add robust reconnection and state resumption, and profile under realistic loads. The examples here give a practical foundation; adapt them to your protocol specifics and production constraints.
+
+If you'd like, I can generate a small reusable Node.js library scaffold that wraps reconnection, ndjson parsing, and backpressure handling tailored to your environment.
+`,
+      es: `# Introducción
+
+Las aplicaciones modernas consumen cada vez más datos continuos: logs, métricas, telemetría, chat o ticks financieros. Un lector de datos en tiempo real consume APIs streaming para entregar actualizaciones con baja latencia a servicios y UIs. Este artículo explica qué es, por qué importa y muestra patrones prácticos y preparados para producción para SSE, WebSockets y HTTP chunked, con ejemplos de código y recomendaciones operativas.
+
+## Qué es
+
+Un lector de datos en tiempo real es un componente cliente (o biblioteca) que se conecta a una fuente de datos streaming y consume mensajes o eventos de forma incremental conforme llegan. Las APIs streaming mantienen una conexión persistente en lugar de usar ciclos de petición/respuesta discretos. Protocolos comunes:
+
+- Server-Sent Events (SSE): flujo de eventos unidireccional sobre HTTP.
+- WebSockets: socket full-duplex sobre HTTP, útil para datos bidireccionales.
+- HTTP chunked / Transfer-Encoding: respuestas en trozos que emiten partes del cuerpo (a menudo ndjson, CSV o framing personalizado).
+- gRPC streaming y otros protocolos binarios (no tratados en profundidad aquí).
+
+## Por qué importa
+
+- Baja latencia: los clientes reciben actualizaciones en cuanto están disponibles.
+- Eficiencia: evita polling; menos solicitudes y menos overhead.
+- Control de flujo: los streams permiten un uso más suave de recursos.
+- Experiencia de usuario: dashboards en vivo, chat, apps colaborativas y financieras requieren streaming.
+
+## Tutorial paso a paso
+
+Cubriremos lectores del lado cliente (Node.js y Python) y un ejemplo mínimo de servidor SSE. Enfócate en: conexión, parsing ndjson, reconexión, consideraciones de backpressure y manejo de errores.
+
+### 1) Servidor SSE mínimo (Node.js)
+
+Este ejemplo con Express emite un evento cada segundo; útil para pruebas locales.
+
+\`\`\`js
+// server-sse.js
+const express = require('express');
+const app = express();
+
+app.get('/events', (req, res) => {
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.flushHeaders();
+
+  let id = 0;
+  const timer = setInterval(() => {
+    const payload = { id: id++, time: new Date().toISOString() };
+    res.write(\`data: \${JSON.stringify(payload)}\\n\\n\`);
+  }, 1000);
+
+  req.on('close', () => {
+    clearInterval(timer);
+  });
+});
+
+app.listen(3000, () => console.log('SSE server running on http://localhost:3000/events'));
+\`\`\`
+
+### 2) Node.js: lector de HTTP chunked o ndjson (fetch + streams)
+
+Node (18+) y navegadores exponen ReadableStream. Usa streaming fetch para parsear ndjson línea por línea.
+
+\`\`\`js
+// client-ndjson.js (Node 18+)
+import fetch from 'node-fetch'; // o fetch integrado en Node 18+
+
+async function readNdjson(url) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(\`HTTP \${res.status}\`);
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    let lines = buffer.split('\\n');
+    buffer = lines.pop();
+    for (const line of lines) {
+      if (!line.trim()) continue;
+      try {
+        const obj = JSON.parse(line);
+        console.log('event', obj);
+      } catch (err) {
+        console.warn('parse error', err, line);
+      }
+    }
+  }
+
+  if (buffer.trim()) {
+    try { console.log('final', JSON.parse(buffer)); } catch (e) { }
+  }
+}
+
+readNdjson('https://example.com/stream');
+\`\`\`
+
+Notas:
+- ndjson (JSON delimitado por nuevas líneas) es común en streams chunked.
+- Para mayor rendimiento usa parseadores basados en streaming si necesitas más throughput.
+
+### 3) Cliente SSE para navegador (EventSource)
+
+SSE es la opción más simple para streams de servidor a cliente en navegadores.
+
+\`\`\`js
+// browser-sse.js
+const es = new EventSource('https://example.com/events');
+
+es.onmessage = (e) => {
+  try {
+    const data = JSON.parse(e.data);
+    console.log('sse', data);
+  } catch (err) {
+    console.warn('sse parse', err);
+  }
+};
+
+es.onerror = (err) => {
+  console.error('SSE error', err);
+  // EventSource reconecta automáticamente; puedes cerrar y recrear si lo necesitas
+};
+\`\`\`
+
+### 4) Cliente WebSocket (Node.js)
+
+Usa WebSockets para necesidades bidireccionales y mensajería de baja latencia.
+
+\`\`\`js
+// ws-client.js
+import WebSocket from 'ws';
+const ws = new WebSocket('wss://example.com/ws');
+
+ws.on('open', () => {
+  console.log('open');
+  ws.send(JSON.stringify({ type: 'subscribe', channel: 'ticks' }));
+});
+
+ws.on('message', (msg) => {
+  try {
+    const data = JSON.parse(msg.toString());
+    console.log('ws', data);
+  } catch (err) {
+    console.warn('ws parse', err);
+  }
+});
+
+ws.on('close', () => console.log('closed'));
+ws.on('error', (err) => console.error('ws error', err));
+\`\`\`
+
+### 5) Python asyncio lector chunked (aiohttp)
+
+Ejemplo que lee un stream ndjson con aiohttp y parseo incremental.
+
+\`\`\`py
+# client_asyncio.py
+import aiohttp
+import asyncio
+import json
+
+async def read_ndjson(url):
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            buffer = ''
+            async for chunk, _ in resp.content.iter_chunks():
+                text = chunk.decode('utf-8')
+                buffer += text
+                lines = buffer.split('\\n')
+                buffer = lines.pop()
+                for line in lines:
+                    if not line.strip():
+                        continue
+                    try:
+                        obj = json.loads(line)
+                        print('event', obj)
+                    except Exception as e:
+                        print('parse error', e)
+            if buffer.strip():
+                try:
+                    print('final', json.loads(buffer))
+                except:
+                    pass
+
+asyncio.run(read_ndjson('https://example.com/stream'))
+\`\`\`
+
+### Reconexión y resiliencia
+
+- Exponential backoff con jitter en desconexiones.
+- Usa ID del último mensaje visto (si la API lo soporta) para reanudar sin pérdida de datos.
+- Distingue errores transitorios de errores terminales (4xx).
+- SSE: EventSource reconecta automáticamente; combina con last-event-id en el servidor.
+- WebSockets: implementa ping/pong y reconexión automática con reconciliación de estado.
+
+### Backpressure y control de flujo
+
+- Si el consumidor es más lento que el productor, el búfer puede crecer y agotar memoria. Estrategias:
+  - Colas acotadas y eliminación/compactación de mensajes antiguos.
+  - Transformaciones en streaming y procesamiento incremental.
+  - Si el servidor lo permite, usa control de flujo por conexión o solicita lotes más pequeños.
+
+### Seguridad y prácticas para producción
+
+- TLS (https/wss).
+- Autenticación en el handshake inicial (cabeceras HTTP, cookies, tokens) y rotación de tokens.
+- Limitación de tasa y monitorización de conexiones por cliente.
+- Sanitizar y validar datos entrantes; no ejecutar contenido no confiable.
+
+## Casos de uso
+
+- Dashboards en vivo (métricas, monitoring).
+- Chat y aplicaciones colaborativas.
+- Tickers financieros y feeds de trading.
+- Telemetría y pipelines de logs.
+- APIs largas que devuelven resultados progresivos (por ejemplo, inferencia ML).
+
+## Pros y Contras
+
+Pros:
+
+- Baja latencia y uso eficiente de red.
+- Experiencias en tiempo real y reacciones inmediatas.
+- Menos overhead que el polling.
+
+Contras:
+
+- Complejidad: reconexión, orden, deduplicación y backpressure.
+- Retos operativos: conexiones de larga duración y límites de conexiones.
+- Algunos protocolos (SSE) son unidireccionales; otros requieren más infraestructura.
+
+## Conclusión
+
+Implementar un lector de datos en tiempo real implica elegir el transporte adecuado (SSE, WebSockets, HTTP chunked) y diseñar para resiliencia: parseo incremental, colas acotadas, estrategias de reconexión y transporte seguro. Empieza con un cliente mínimo que parsee ndjson o SSE, añade reconexión robusta y reanudación de estado, y prueba con cargas realistas. Los ejemplos de este artículo ofrecen una base práctica; adáptalos a los requisitos del protocolo y las restricciones de producción de tu sistema.
+
+Si quieres, puedo generar un scaffold de biblioteca en Node.js que envuelva reconexión, parseo ndjson y manejo de backpressure adaptado a tu entorno.
+`,
+    },
+    category: "tutorials",
+    tags: ["real-time","streaming","apis","sse","websockets","ndjson"],
+    author: "DevAI Team",
+    publishedAt: "2026-04-18",
+readTime: 4,
+    featured: true,
+    image: "/articles/real-time-readerstreaming-apis.png",
+    imagePrompt: "Create a horizontal editorial hero illustration for a modern developer blog. Use a restrained visual system aligned to the site design: crisp white or light neutral background, deep charcoal shadows, and green accent lighting close to emerald terminal green. Compose the scene with one clear technical focal point related to a real-time data reader—such as an abstracted network stream node or stylized pipeline panel emitting flowing data lines—plus subtle supporting abstract shapes, grids, panels, or code-inspired geometry. Use clean depth, soft gradients, elegant contrast, and intentional negative space so headlines could sit on top if needed. Style should feel premium, minimal, sharp, and consistent across articles. Do not include logos, brand marks, screenshots, UI chrome, watermarks, or readable text inside the image. Avoid cartoonish styles, stock-photo look, random colors, busy scenes, and inconsistent visual metaphors.",
   },
 ];
 
@@ -7229,5 +7718,9 @@ export function getPostsByCategory(category: string) {
 }
 
 export function getFeaturedPosts() {
-  return posts.filter((p) => p.featured);
+  const featured = posts.filter((p) => p.featured && p.image);
+  if (featured.length >= 3) return featured.slice(0, 3);
+  const withImage = posts.filter((p) => p.image);
+  const byReadTime = posts.filter((p) => !p.image).sort((a, b) => (b.readTime || 0) - (a.readTime || 0));
+  return [...withImage, ...byReadTime].slice(0, 3);
 }
