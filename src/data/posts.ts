@@ -6733,6 +6733,481 @@ Un agente interno en Slack funciona mejor cuando es honesto sobre incertidumbre 
     featured: false,
     image: "",
   },
+  {
+    slug: "ai-knowledge-base-nextjs-pgvector",
+    title: {
+      en: "Build an AI Knowledge Base with Next.js and pgvector",
+      es: "Construye una Base de Conocimiento AI con Next.js y pgvector",
+    },
+    excerpt: {
+      en: "Build an AI knowledge base with Next.js and pgvector: step-by-step setup, embeddings, vector storage, fast semantic search, Node/TypeScript examples and deployment tips.",
+      es: "Crea una base de conocimiento AI con Next.js y pgvector: configuración paso a paso, embeddings, almacenamiento vectorial, búsqueda semántica rápida y ejemplos en Node/TypeScript.",
+    },
+    content: {
+      en: `# Introduction
+
+Building a semantic, AI-powered knowledge base unlocks much better search and retrieval than keyword-only approaches. This tutorial shows how to combine Next.js, Postgres with the pgvector extension, and an embedding provider to store, index, and query semantically rich document vectors.
+
+You'll get a reproducible stack, TypeScript code for ingestion and retrieval, indexing tips, and deployment notes so you can run a cost-effective, production-ready knowledge base.
+
+# What is it
+
+A knowledge base here means a searchable store of documents (articles, FAQs, transcripts) that you can query semantically. Instead of matching words, we convert text into numeric embeddings and store them in Postgres using pgvector. At query time we embed the user query and run a nearest-neighbor vector search to return the most relevant documents.
+
+Key components:
+
+- Next.js: frontend and API endpoints (ingest, search, management).
+- Postgres + pgvector: persistent storage for vectors and metadata.
+- Embedding provider (OpenAI or compatible): converts text -> vector.
+- Vector indexing: ivfflat/hnsw for fast nearest-neighbor search.
+
+# Why it matters
+
+- Semantic relevance: Finds conceptually similar content rather than exact keyword matches.
+- Simple architecture: Uses a single relational datastore with an extension, no separate vector DB required.
+- Familiar developer UX: Use standard SQL, tooling, and deployments.
+- Cost control: Use Postgres on your cloud provider instead of a managed vector DB when appropriate.
+
+# Step-by-step tutorial
+
+This section walks through a minimal, practical implementation using:
+- Next.js (app router + TypeScript)
+- node-postgres (pg)
+- pgvector (Postgres extension)
+- Embeddings via an HTTP API (example uses OpenAI embeddings endpoint style)
+
+Prerequisites
+
+- Node 18+ and yarn/npm
+- Docker (optional, for local Postgres with pgvector)
+- An embeddings API key (OPENAI_API_KEY or other provider)
+
+1) Start Postgres with pgvector (local)
+
+Docker Compose quick-start (local dev):
+
+\`\`\`yaml
+version: '3.8'
+services:
+  db:
+    image: ankane/pgvector:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+\`\`\`
+
+Alternatively install the pgvector extension on your managed Postgres and run \`CREATE EXTENSION IF NOT EXISTS vector;\`.
+
+2) Database schema and index
+
+Connect to Postgres and run:
+
+\`\`\`sql
+CREATE EXTENSION IF NOT EXISTS vector;
+
+CREATE TABLE documents (
+  id SERIAL PRIMARY KEY,
+  title TEXT,
+  content TEXT NOT NULL,
+  embedding VECTOR(153), -- 153 here is example; depends on your embedding model
+  metadata JSONB,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Example ivfflat index for cosine/l2 (tune lists to your dataset)
+CREATE INDEX documents_embedding_idx ON documents
+  USING ivfflat (embedding vector_cosine_ops)
+  WITH (lists = 100);
+
+-- Optional: for HNSW (if pgvector and Postgres version support it)
+-- CREATE INDEX documents_hnsw_idx ON documents USING hnsw (embedding vector_l2_ops) WITH (m = 16, ef_construction = 200);
+\`\`\`
+
+Notes:
+- embedding dimension must match the embedding provider's vector size (e.g., 153, 512, 1024).
+- ivfflat is good for large collections; hnsw typically gives better recall but has different tuning knobs.
+
+3) Install Node dependencies
+
+\`\`\`bash
+npm init -y
+npm install next react react-dom pg dotenv
+# Optional: use fetch-based client for embedding API or official SDK
+\`\`\`
+
+4) Environment variables
+
+Create a .env.local (or set env in deployment):
+
+\`\`\`
+DATABASE_URL=postgres://postgres:postgres@localhost:5432/postgres
+EMBEDDING_API_KEY=your_api_key_here
+EMBEDDING_URL=https://api.openai.com/v1/embeddings
+EMBEDDING_MODEL=text-embedding-3-small  # example
+\`\`\`
+
+5) Basic embedding helper (TypeScript)
+
+This example uses fetch to call an embeddings endpoint. Replace with your provider's SDK if desired.
+
+\`\`\`ts
+// lib/embeddings.ts
+import fetch from 'node-fetch';
+
+const EMBEDDING_URL = process.env.EMBEDDING_URL!;
+const EMBEDDING_API_KEY = process.env.EMBEDDING_API_KEY!;
+const MODEL = process.env.EMBEDDING_MODEL || 'text-embedding-3-small';
+
+export async function getEmbedding(text: string): Promise<number[]> {
+  const res = await fetch(EMBEDDING_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': \`Bearer \${EMBEDDING_API_KEY}\`
+    },
+    body: JSON.stringify({ model: MODEL, input: text })
+  });
+  if (!res.ok) throw new Error(\`Embedding request failed: \${res.status}\`);
+  const data = await res.json();
+  return data.data[0].embedding; // adjust to provider response
+}
+\`\`\`
+
+6) Insert documents (Next.js API route)
+
+Using the app router API (app/api/ingest/route.ts):
+
+\`\`\`ts
+// app/api/ingest/route.ts
+import { NextResponse } from 'next/server';
+import { Client } from 'pg';
+import { getEmbedding } from '@/lib/embeddings';
+
+const client = new Client({ connectionString: process.env.DATABASE_URL });
+client.connect();
+
+export async function POST(req: Request) {
+  const { title, content, metadata } = await req.json();
+  const embedding = await getEmbedding(content);
+  await client.query(
+    'INSERT INTO documents (title, content, embedding, metadata) VALUES ($1, $2, $3, $4)',
+    [title, content, embedding, metadata || {}]
+  );
+  return NextResponse.json({ ok: true });
+}
+\`\`\`
+
+7) Query / Search route
+
+Convert the user query into an embedding and run a nearest-neighbor SQL query.
+
+\`\`\`ts
+// app/api/search/route.ts
+import { NextResponse } from 'next/server';
+import { Client } from 'pg';
+import { getEmbedding } from '@/lib/embeddings';
+
+const client = new Client({ connectionString: process.env.DATABASE_URL });
+client.connect();
+
+export async function POST(req: Request) {
+  const { query, limit = 5 } = await req.json();
+  const qEmbedding = await getEmbedding(query);
+
+  // Use cosine operator (vector_cosine_ops) or L2 (<->). Check your index ops.
+  const sql = \`
+    SELECT id, title, content, metadata,
+      embedding <#> $1 AS distance
+    FROM documents
+    ORDER BY embedding <#> $1
+    LIMIT $2
+  \`;
+
+  const { rows } = await client.query(sql, [qEmbedding, limit]);
+  return NextResponse.json({ results: rows });
+}
+\`\`\`
+
+Notes on the SQL:
+- Replace the operator if needed: \`<->\` for L2 distance, \`<#>\` for cosine distance (verify version).
+- Passing the embedding as a parameter works since node-postgres serializes arrays into Postgres vector literal.
+
+8) Frontend and integration
+
+Create a simple UI that calls /api/ingest and /api/search. Keep queries short, and include metadata (source URL, document id, section) to let your UI link back to the original content.
+
+# Use Cases
+
+- Internal docs search: index wikis, playbooks, and release notes for engineers.
+- Customer support KB: surface relevant articles for support agents or chatbots.
+- Meeting transcripts: search and summarize specific conversations.
+- Developer portals: surface code snippets or API examples semantically.
+
+# Pros and Cons
+
+Pros:
+- Familiar stack: SQL + Node.js + Next.js.
+- Lower operational complexity if you already manage Postgres.
+- Fine-grained control of indexing and storage costs.
+
+Cons:
+- Postgres + pgvector adds load—large-scale workloads may need tuned hardware or a dedicated vector service.
+- Index tuning required (lists, m, ef_construction) to balance latency and recall.
+- Embedding costs and latency depend on provider; you may need caching and batching.
+
+# Conclusion
+
+Using Next.js + Postgres + pgvector is a pragmatic path to a production-ready AI knowledge base. The pattern is straightforward: embed content, store embeddings + metadata, index vectors, and run nearest-neighbor queries for semantic search.
+
+Next steps:
+- Add chunking and document splitting (for long documents).
+- Implement batching and rate limiting when embedding large volumes.
+- Add result reranking or prompt-based summarization on top of retrieved documents.
+- Monitor and tune your Postgres instance and vector indexes for your data size.
+
+This setup is extensible: swap embedding providers, add hybrid retrieval (keywords + vectors), and integrate a conversational layer in front of the retrieval pipeline.
+
+Happy building!
+`,
+      es: `# Introducción
+
+Crear una base de conocimiento impulsada por IA permite búsquedas semánticas mucho más precisas que las búsquedas por palabras clave. En este tutorial verás cómo combinar Next.js, Postgres con la extensión pgvector y un proveedor de embeddings para almacenar, indexar y consultar vectores semánticos.
+
+Tendrás una pila reproducible, código TypeScript para ingestión y recuperación, consejos de indexado y notas de despliegue para ejecutar una base de conocimiento lista para producción.
+
+# ¿Qué es?
+
+Una base de conocimiento, en este contexto, es un repositorio de documentos (artículos, FAQs, transcripciones) que se pueden consultar semánticamente. En lugar de coincidir palabras, convertimos texto en embeddings numéricos y los almacenamos en Postgres con pgvector. Al hacer una consulta, embebemos la pregunta y buscamos los vectores más cercanos para devolver documentos relevantes.
+
+Componentes clave:
+
+- Next.js: frontend y endpoints API (ingest, búsqueda, administración).
+- Postgres + pgvector: almacenamiento persistente de vectores y metadatos.
+- Proveedor de embeddings: convierte texto -> vector.
+- Indexado vectorial: ivfflat o hnsw para búsquedas rápidas de vecinos más cercanos.
+
+# Por qué importa
+
+- Relevancia semántica: encuentra contenido relacionado por concepto, no solo por coincidencia de palabras.
+- Arquitectura simple: un único datastore relacional con una extensión, sin necesidad de un vector DB por separado.
+- Experiencia de desarrollo conocida: SQL, herramientas y despliegues familiares.
+- Control de costes: puedes usar Postgres gestionado por tu proveedor en lugar de un servicio de vector dedicado.
+
+# Tutorial paso a paso
+
+Esta sección muestra una implementación práctica mínima usando:
+- Next.js (app router + TypeScript)
+- node-postgres (pg)
+- pgvector (extensión de Postgres)
+- Embeddings vía API HTTP (ejemplo con estilo OpenAI)
+
+Prerequisitos
+
+- Node 18+ y yarn/npm
+- Docker (opcional, para Postgres local con pgvector)
+- Una clave para el proveedor de embeddings (EMBEDDING_API_KEY)
+
+1) Levantar Postgres con pgvector (local)
+
+Quick-start con Docker Compose:
+
+\`\`\`yaml
+version: '3.8'
+services:
+  db:
+    image: ankane/pgvector:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+\`\`\`
+
+Alternativamente instala la extensión pgvector en tu Postgres gestionado y ejecuta \`CREATE EXTENSION IF NOT EXISTS vector;\`.
+
+2) Esquema de la base de datos e índices
+
+Conéctate a Postgres y ejecuta:
+
+\`\`\`sql
+CREATE EXTENSION IF NOT EXISTS vector;
+
+CREATE TABLE documents (
+  id SERIAL PRIMARY KEY,
+  title TEXT,
+  content TEXT NOT NULL,
+  embedding VECTOR(153), -- 153 es un ejemplo; depende del modelo
+  metadata JSONB,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE INDEX documents_embedding_idx ON documents
+  USING ivfflat (embedding vector_cosine_ops)
+  WITH (lists = 100);
+
+-- Opcional: índice HNSW si tu instalación lo soporta
+-- CREATE INDEX documents_hnsw_idx ON documents USING hnsw (embedding vector_l2_ops) WITH (m = 16, ef_construction = 200);
+\`\`\`
+
+Notas:
+- La dimensión del embedding debe coincidir con la del modelo del proveedor (153, 512, etc.).
+- Ajusta \`lists\`, \`m\` y \`ef_construction\` según el volumen de datos y los requisitos de latencia/recuerdo.
+
+3) Instalar dependencias Node
+
+\`\`\`bash
+npm init -y
+npm install next react react-dom pg dotenv
+\`\`\`
+
+4) Variables de entorno
+
+Crea .env.local con:
+
+\`\`\`
+DATABASE_URL=postgres://postgres:postgres@localhost:5432/postgres
+EMBEDDING_API_KEY=tu_clave
+EMBEDDING_URL=https://api.openai.com/v1/embeddings
+EMBEDDING_MODEL=text-embedding-3-small
+\`\`\`
+
+5) Helper de embeddings (TypeScript)
+
+Ejemplo usando fetch para llamar a la API de embeddings. Sustituye por el SDK de tu proveedor si lo prefieres.
+
+\`\`\`ts
+// lib/embeddings.ts
+import fetch from 'node-fetch';
+
+const EMBEDDING_URL = process.env.EMBEDDING_URL!;
+const EMBEDDING_API_KEY = process.env.EMBEDDING_API_KEY!;
+const MODEL = process.env.EMBEDDING_MODEL || 'text-embedding-3-small';
+
+export async function getEmbedding(text: string): Promise<number[]> {
+  const res = await fetch(EMBEDDING_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': \`Bearer \${EMBEDDING_API_KEY}\`
+    },
+    body: JSON.stringify({ model: MODEL, input: text })
+  });
+  if (!res.ok) throw new Error(\`Embedding request failed: \${res.status}\`);
+  const data = await res.json();
+  return data.data[0].embedding;
+}
+\`\`\`
+
+6) Ruta API para insertar documentos
+
+Ejemplo con app router (app/api/ingest/route.ts):
+
+\`\`\`ts
+// app/api/ingest/route.ts
+import { NextResponse } from 'next/server';
+import { Client } from 'pg';
+import { getEmbedding } from '@/lib/embeddings';
+
+const client = new Client({ connectionString: process.env.DATABASE_URL });
+client.connect();
+
+export async function POST(req: Request) {
+  const { title, content, metadata } = await req.json();
+  const embedding = await getEmbedding(content);
+  await client.query(
+    'INSERT INTO documents (title, content, embedding, metadata) VALUES ($1, $2, $3, $4)',
+    [title, content, embedding, metadata || {}]
+  );
+  return NextResponse.json({ ok: true });
+}
+\`\`\`
+
+7) Ruta API de búsqueda
+
+Embede la consulta y ejecuta una búsqueda de vecinos más cercanos:
+
+\`\`\`ts
+// app/api/search/route.ts
+import { NextResponse } from 'next/server';
+import { Client } from 'pg';
+import { getEmbedding } from '@/lib/embeddings';
+
+const client = new Client({ connectionString: process.env.DATABASE_URL });
+client.connect();
+
+export async function POST(req: Request) {
+  const { query, limit = 5 } = await req.json();
+  const qEmbedding = await getEmbedding(query);
+
+  const sql = \`
+    SELECT id, title, content, metadata,
+      embedding <#> $1 AS distance
+    FROM documents
+    ORDER BY embedding <#> $1
+    LIMIT $2
+  \`;
+
+  const { rows } = await client.query(sql, [qEmbedding, limit]);
+  return NextResponse.json({ results: rows });
+}
+\`\`\`
+
+Notas:
+- Usa el operador adecuado para tu distancia: \`<->\` para L2, \`<#>\` para coseno (verifica tu versión de pgvector).
+- node-postgres serializa arrays para que se puedan insertar como vector.
+
+8) Interfaz y UX
+
+Construye una UI sencilla que llame a /api/ingest y /api/search. Incluye metadata como URL, secciones y IDs para enlazar con la fuente original.
+
+# Casos de uso
+
+- Documentación interna: indexa wiki, runbooks y notas de ingeniería.
+- Soporte al cliente: sugiere artículos relevantes para ayudar a agentes o chatbots.
+- Transcripciones de reuniones: busca por temas o decisiones.
+- Portal para desarrolladores: busca ejemplos de código y guías por intención.
+
+# Ventajas y desventajas
+
+Ventajas:
+- Pila conocida: SQL + Node + Next.js.
+- Control y menores costes si ya usas Postgres.
+- Flexibilidad en indexado y almacenamiento.
+
+Desventajas:
+- Carga adicional en Postgres; para escalado extremo puede convenir un servicio dedicado.
+- Requiere ajuste de índices y parámetros para buen rendimiento.
+- Costes y latencia de embeddings según proveedor; considera batching y cache.
+
+# Conclusión
+
+Next.js + Postgres + pgvector es una solución práctica para una base de conocimiento semántica. El flujo es: dividir documentos si es necesario, generar embeddings, almacenar vectores y metadatos, crear índice y ejecutar búsquedas de vecinos más cercanos.
+
+Siguientes pasos recomendados:
+- Implementar chunking y solapamiento para documentos largos.
+- Batching y control de tasa para la generación masiva de embeddings.
+- Re-rankeo o resumen por prompt tras la recuperación para mejorar resultados UX.
+
+Con esto tendrás una base sólida y extensible: cambia proveedor de embeddings, añade recuperación híbrida (palabras clave + vectores) o integra una capa conversacional por encima del retrieval.
+
+¡A construir!
+`,
+    },
+    category: "tutorials",
+    tags: ["next.js","pgvector","postgresql","vectors","embeddings","ai-knowledge-base"],
+    author: "DevAI Team",
+    publishedAt: "2026-04-18",
+    readTime: 4,
+    featured: false,
+    image: "/articles/ai-knowledge-base-nextjs-pgvector.png",
+    imagePrompt: "Create a horizontal editorial hero illustration for a modern developer blog. Use a restrained visual system aligned to the site design: crisp white or light neutral background, deep charcoal shadows, and green accent lighting close to emerald terminal green. Compose the scene with one clear technical focal point related to building an AI knowledge base with vectors—e.g., an abstract vector grid or a stylized stack showing a database panel and a code terminal represented as clean geometric blocks. Add subtle supporting abstract shapes, soft grid lines, and panel-like geometry suggesting rows of data or embeddings. Use clean depth, soft gradients, elegant contrast, and intentional negative space so headlines could sit on top if needed. Style should feel premium, minimal, sharp, and consistent across articles. Do not include logos, brand marks, screenshots, UI chrome, watermarks, or readable text inside the image. Avoid cartoonish styles, stock-photo look, random colors, busy scenes, and inconsistent visual metaphors.",
+  },
 ];
 
 export function getPostsByLocale(locale: Locale) {
