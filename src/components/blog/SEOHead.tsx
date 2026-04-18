@@ -48,6 +48,7 @@ export default function SEOHead({ title, description, url, image, type = "websit
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={description} />
+      {image && <meta name="twitter:image" content={image} />}
       <link rel="canonical" href={url} />
       <html lang={locale} />
       <script type="application/ld+json">{JSON.stringify(structuredData)}</script>

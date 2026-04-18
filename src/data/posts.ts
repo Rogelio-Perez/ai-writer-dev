@@ -10,8 +10,10 @@ export interface BlogPost {
   tags: string[];
   author: string;
   publishedAt: string;
+  readTime?: number;
   featured: boolean;
   image: string;
+  imagePrompt?: string;
 }
 
 export const posts: BlogPost[] = [
