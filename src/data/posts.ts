@@ -1301,6 +1301,2097 @@ La mejor manera de aprender es construyendo. Comienza con implementaciones simpl
     featured: false,
     image: "",
   },
+  {
+    slug: "openai-api-complete-guide",
+    title: {
+      en: "Complete Guide to OpenAI API for Developers",
+      es: "Guía Completa de la API de OpenAI para Developers",
+    },
+    excerpt: {
+      en: "Learn how to integrate OpenAI's API into your applications. From GPT models to embeddings, this guide covers everything you need.",
+      es: "Aprende a integrar la API de OpenAI en tus aplicaciones. Desde modelos GPT hasta embeddings, esta guía cubre todo lo que necesitas.",
+    },
+    content: {
+      en: `## Introduction
+
+OpenAI's API has become the gold standard for building AI-powered applications. Whether you're building chatbots, content generators, or code assistants, understanding how to properly integrate these APIs is essential.
+
+In this comprehensive guide, we'll cover everything from basic setup to advanced implementations.
+
+## What Is the OpenAI API?
+
+The OpenAI API provides access to GPT models, DALL-E for image generation, Whisper for speech recognition, and more. You pay per token processed, making it scalable for projects of any size.
+
+## Why It Matters
+
+| Feature | Use Case | Pricing |
+|---------|----------|---------|
+| GPT-4 | Complex reasoning, coding | $0.03-0.06/1K tokens |
+| GPT-3.5 | Fast responses | $0.0015/1K tokens |
+| Embeddings | Semantic search | $0.0001/1K tokens |
+| DALL-E 3 | Image generation | $0.04-0.12/image |
+
+## Getting Started
+
+### 1. Obtain Your API Key
+
+\`\`\`bash
+# Visit https://platform.openai.com/api-keys
+# Create a new secret key
+export OPENAI_API_KEY="sk-your-key-here"
+\`\`\`
+
+### 2. Install the SDK
+
+\`\`\`bash
+npm install openai
+# or
+pip install openai
+\`\`\`
+
+### 3. Basic Implementation
+
+\`\`\`typescript
+import OpenAI from 'openai';
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+async function generateText(prompt: string) {
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4",
+    messages: [
+      { role: "system", content: "You are a helpful coding assistant." },
+      { role: "user", content: prompt }
+    ],
+    temperature: 0.7,
+    max_tokens: 1000,
+  });
+
+  return completion.choices[0].message.content;
+}
+
+// Usage
+const response = await generateText("Explain React hooks in simple terms");
+console.log(response);
+\`\`\`
+
+### 4. Using Embeddings
+
+\`\`\`typescript
+async function getEmbeddings(text: string) {
+  const response = await openai.embeddings.create({
+    model: "text-embedding-3-small",
+    input: text,
+  });
+  
+  return response.data[0].embedding;
+}
+
+// Semantic search example
+const documents = [
+  "How to install Node.js",
+  "Python list comprehension",
+  "React useEffect hook",
+];
+
+const query = "React hooks tutorial";
+const queryEmbedding = await getEmbeddings(query);
+
+const similarities = await Promise.all(
+  documents.map(async (doc) => ({
+    doc,
+    similarity: cosineSimilarity(queryEmbedding, await getEmbeddings(doc))
+  }))
+);
+
+console.log(similarities.sort((a, b) => b.similarity - a.similarity));
+\`\`\`
+
+## Advanced Patterns
+
+### Streaming Responses
+
+\`\`\`typescript
+async function streamResponse(prompt: string) {
+  const stream = await openai.chat.completions.create({
+    model: "gpt-4",
+    messages: [{ role: "user", content: prompt }],
+    stream: true,
+  });
+
+  for await (const chunk of stream) {
+    process.stdout.write(chunk.choices[0]?.delta?.content || "");
+  }
+}
+\`\`\`
+
+### Function Calling
+
+\`\`\`typescript
+const completion = await openai.chat.completions.create({
+  model: "gpt-4",
+  messages: [{ role: "user", content: "What's the weather in Madrid?" }],
+  tools: [{
+    type: "function",
+    function: {
+      name: "get_weather",
+      parameters: {
+        type: "object",
+        properties: {
+          city: { type: "string", description: "City name" }
+        },
+        required: ["city"]
+      }
+    }
+  }]
+});
+
+const toolCall = completion.choices[0].message.tool_calls[0];
+// Execute the function
+\`\`\`
+
+## Use Cases
+
+- 💬 **Chatbots**: Customer support, virtual assistants
+- 📝 **Content Generation**: Blog posts, marketing copy
+- 🔍 **Semantic Search**: Document retrieval, recommendation systems
+- 💻 **Code Assistance**: Code review, bug detection
+- 🎨 **Image Generation**: Product images, art creation
+
+## Pros and Cons
+
+**Pros:**
+- ✅ State-of-the-art models
+- ✅ Comprehensive documentation
+- ✅ Flexible pricing
+- ✅ Strong safety measures
+
+**Cons:**
+- ❌ Can be expensive at scale
+- ❌ Rate limits apply
+- ❌ Requires careful prompt engineering
+- ❌ Latency can vary
+
+## Conclusion
+
+The OpenAI API is powerful but requires understanding its nuances. Start with simple implementations, monitor costs, and gradually add complexity. The key is finding the right model for your specific use case.
+
+Start integrating today and transform your applications with AI! 🚀`,
+      es: `## Introducción
+
+La API de OpenAI se ha convertido en el estándar de oro para construir aplicaciones potenciadas por IA. Ya sea que construyas chatbots, generadores de contenido o asistentes de código, entender cómo integrar estas APIs es esencial.
+
+En esta guía completa, cubriremos todo desde la configuración básica hasta implementaciones avanzadas.
+
+## ¿Qué Es la API de OpenAI?
+
+La API de OpenAI proporciona acceso a modelos GPT, DALL-E para generación de imágenes, Whisper para reconocimiento de voz, y más. Pagas por token procesado, haciéndolo escalable para proyectos de cualquier tamaño.
+
+## Por Qué Importa
+
+| Característica | Caso de Uso | Precio |
+|-----------|-----------|---------|
+| GPT-4 | Razonamiento complejo, código | $0.03-0.06/1K tokens |
+| GPT-3.5 | Respuestas rápidas | $0.0015/1K tokens |
+| Embeddings | Búsqueda semántica | $0.0001/1K tokens |
+| DALL-E 3 | Generación de imágenes | $0.04-0.12/imagen |
+
+## Primeros Pasos
+
+### 1. Obtén Tu API Key
+
+\`\`\`bash
+# Visita https://platform.openai.com/api-keys
+# Crea una nueva clave secreta
+export OPENAI_API_KEY="sk-tu-clave-aqui"
+\`\`\`
+
+### 2. Instala el SDK
+
+\`\`\`bash
+npm install openai
+# o
+pip install openai
+\`\`\`
+
+### 3. Implementación Básica
+
+\`\`\`typescript
+import OpenAI from 'openai';
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+async function generateText(prompt: string) {
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4",
+    messages: [
+      { role: "system", content: "Eres un asistente de código útil." },
+      { role: "user", content: prompt }
+    ],
+    temperature: 0.7,
+    max_tokens: 1000,
+  });
+
+  return completion.choices[0].message.content;
+}
+
+// Uso
+const response = await generateText("Explica los hooks de React en términos simples");
+console.log(response);
+\`\`\`
+
+### 4. Usando Embeddings
+
+\`\`\`typescript
+async function getEmbeddings(text: string) {
+  const response = await openai.embeddings.create({
+    model: "text-embedding-3-small",
+    input: text,
+  });
+  
+  return response.data[0].embedding;
+}
+
+// Ejemplo de búsqueda semántica
+const documents = [
+  "Cómo instalar Node.js",
+  "List comprehension en Python",
+  "Hook useEffect de React",
+];
+
+const query = "Tutorial de hooks de React";
+const queryEmbedding = await getEmbeddings(query);
+
+const similarities = await Promise.all(
+  documents.map(async (doc) => ({
+    doc,
+    similarity: cosineSimilarity(queryEmbedding, await getEmbeddings(doc))
+  }))
+);
+
+console.log(similarities.sort((a, b) => b.similarity - a.similarity));
+\`\`\`
+
+## Patrones Avanzados
+
+### Respuestas en Streaming
+
+\`\`\`typescript
+async function streamResponse(prompt: string) {
+  const stream = await openai.chat.completions.create({
+    model: "gpt-4",
+    messages: [{ role: "user", content: prompt }],
+    stream: true,
+  });
+
+  for await (const chunk of stream) {
+    process.stdout.write(chunk.choices[0]?.delta?.content || "");
+  }
+}
+\`\`\`
+
+### Llamadas a Funciones
+
+\`\`\`typescript
+const completion = await openai.chat.completions.create({
+  model: "gpt-4",
+  messages: [{ role: "user", content: "¿Qué tiempo hace en Madrid?" }],
+  tools: [{
+    type: "function",
+    function: {
+      name: "get_weather",
+      parameters: {
+        type: "object",
+        properties: {
+          city: { type: "string", description: "Nombre de la ciudad" }
+        },
+        required: ["city"]
+      }
+    }
+  }]
+});
+
+const toolCall = completion.choices[0].message.tool_calls[0];
+// Ejecutar la función
+\`\`\`
+
+## Casos de Uso
+
+- 💬 **Chatbots**: Soporte al cliente, asistentes virtuales
+- 📝 **Generación de Contenido**: Posts de blog, copy de marketing
+- 🔍 **Búsqueda Semántica**: Recuperación de documentos, sistemas de recomendación
+- 💻 **Asistencia de Código**: Revisión de código, detección de errores
+- 🎨 **Generación de Imágenes**: Imágenes de productos, creación de arte
+
+## Pros y Contras
+
+**Pros:**
+- ✅ Modelos de última generación
+- ✅ Documentación completa
+- ✅ Precios flexibles
+- ✅ Fuertes medidas de seguridad
+
+**Contras:**
+- ❌ Puede ser costoso a escala
+- ❌ Límites de tasa aplican
+- ❌ Requiere careful prompt engineering
+- ❌ La latencia puede variar
+
+## Conclusión
+
+La API de OpenAI es poderosa pero requiere entender sus matices. Comienza con implementaciones simples, monitorea costos y gradualmente añade complejidad. La clave es encontrar el modelo adecuado para tu caso de uso específico.
+
+¡Comienza a integrar hoy y transforma tus aplicaciones con IA! 🚀`,
+    },
+    category: "apis",
+    tags: ["api", "openai", "gpt", "integration", "ai-tools"],
+    author: "DevAI Team",
+    publishedAt: "2026-04-18",
+    featured: true,
+    image: "",
+  },
+  {
+    slug: "ai-agents-autonomous-workflows",
+    title: {
+      en: "Building Autonomous AI Agents for Development Workflows",
+      es: "Construyendo Agentes IA Autónomos para Flujos de Trabajo de Desarrollo",
+    },
+    excerpt: {
+      en: "Discover how to build AI agents that can autonomously handle complex development tasks, from code review to deployment automation.",
+      es: "Descubre cómo construir agentes IA que pueden manejar autonomously tareas complejas de desarrollo, desde revisión de código hasta automatización de deployment.",
+    },
+    content: {
+      en: `## Introduction
+
+AI agents represent the next evolution in developer productivity. Unlike simple chatbots, agents can reason, plan, and execute multi-step tasks autonomously.
+
+In this guide, we'll build an autonomous agent that can handle real-world development workflows.
+
+## What Are AI Agents?
+
+AI agents are autonomous systems that:
+- Perceive their environment
+- Reason about next actions
+- Execute tasks without continuous human input
+- Learn from feedback and improve
+
+## Why It Matters
+
+Traditional automation requires explicit programming of every step. AI agents can handle novel situations by reasoning about them, making them far more flexible than traditional scripts.
+
+## Building Your First Agent
+
+### 1. Core Architecture
+
+\`\`\`typescript
+interface AgentConfig {
+  model: string;
+  maxSteps: number;
+  tools: Tool[];
+  verbose?: boolean;
+}
+
+class AIAgent {
+  private config: AgentConfig;
+  private memory: Message[] = [];
+
+  constructor(config: AgentConfig) {
+    this.config = config;
+  }
+
+  async execute(task: string): Promise<string> {
+    this.memory.push({ role: 'user', content: task });
+    
+    for (let step = 0; step < this.config.maxSteps; step++) {
+      const response = await this.reason();
+      
+      if (response.action === 'complete') {
+        return response.result;
+      }
+      
+      if (response.action === 'tool') {
+        const result = await this.executeTool(response.tool, response.input);
+        this.memory.push({ 
+          role: 'system', 
+          content: \`Tool result: \${result}\` 
+        });
+      }
+    }
+    
+    throw new Error('Max steps reached');
+  }
+
+  private async reason(): Promise<AgentResponse> {
+    // Use LLM to decide next action
+  }
+
+  private async executeTool(tool: string, input: any): Promise<string> {
+    // Execute the chosen tool
+  }
+}
+\`\`\`
+
+### 2. Define Tools
+
+\`\`\`typescript
+const tools = [
+  {
+    name: 'read_file',
+    description: 'Read a file from the filesystem',
+    parameters: {
+      path: { type: 'string', required: true }
+    }
+  },
+  {
+    name: 'write_file',
+    description: 'Write content to a file',
+    parameters: {
+      path: { type: 'string', required: true },
+      content: { type: 'string', required: true }
+    }
+  },
+  {
+    name: 'run_command',
+    description: 'Execute a shell command',
+    parameters: {
+      command: { type: 'string', required: true },
+      cwd: { type: 'string', required: false }
+    }
+  },
+  {
+    name: 'search_code',
+    description: 'Search for code patterns',
+    parameters: {
+      query: { type: 'string', required: true },
+      fileType: { type: 'string', required: false }
+    }
+  }
+];
+\`\`\`
+
+### 3. Implement Tool Execution
+
+\`\`\`typescript
+async function executeTool(name: string, args: Record<string, any>): Promise<string> {
+  switch (name) {
+    case 'read_file':
+      return await fs.promises.readFile(args.path, 'utf-8');
+    
+    case 'write_file':
+      await fs.promises.writeFile(args.path, args.content);
+      return 'File written successfully';
+    
+    case 'run_command':
+      const { stdout, stderr } = await exec(args.command, { cwd: args.cwd });
+      return stdout || stderr;
+    
+    case 'search_code':
+      // Implement code search logic
+      return JSON.stringify(results);
+    
+    default:
+      throw new Error(\`Unknown tool: \${name}\`);
+  }
+}
+\`\`\`
+
+### 4. Create Specialized Agents
+
+\`\`\`typescript
+// Code Review Agent
+const reviewAgent = new AIAgent({
+  model: 'gpt-4',
+  maxSteps: 10,
+  tools: [read_file, search_code, run_command]
+});
+
+// Deployment Agent
+const deployAgent = new AIAgent({
+  model: 'gpt-4',
+  maxSteps: 15,
+  tools: [read_file, write_file, run_command]
+});
+
+// Testing Agent
+const testAgent = new AIAgent({
+  model: 'gpt-4',
+  maxSteps: 20,
+  tools: [read_file, write_file, run_command, search_code]
+});
+\`\`\`
+
+## Use Cases
+
+- 🔍 **Automated Code Review**: Review PRs, suggest improvements
+- 🚀 **CI/CD Automation**: Handle deployments, rollbacks
+- 🐛 **Bug Detection**: Find and suggest fixes
+- 📝 **Documentation**: Generate docs from code
+- 🧪 **Testing**: Create and run test suites
+
+## Pros and Cons
+
+**Pros:**
+- ✅ Handles complex, multi-step tasks
+- ✅ Adapts to novel situations
+- ✅ Reduces manual intervention
+- ✅ Scales across projects
+
+**Cons:**
+- ❌ Can make mistakes
+- ❌ Requires careful monitoring
+- ❌ May need human verification
+- ❌ Costs more than simple automation
+
+## Conclusion
+
+AI agents are transforming how we work. Start with simple agents that handle one task well, then expand to more complex workflows. The key is finding the right balance between autonomy and oversight.
+
+The future of development is agent-assisted. Start building today! 🤖`,
+      es: `## Introducción
+
+Los agentes de IA representan la próxima evolución en la productividad del developer. A diferencia de los chatbots simples, los agentes pueden razonar, planificar y ejecutar tareas de múltiples pasos autonomousamente.
+
+En esta guía, construiremos un agente autónomo que puede manejar flujos de trabajo de desarrollo del mundo real.
+
+## ¿Qué Son los Agentes IA?
+
+Los agentes IA son sistemas autónomos que:
+- Perciben su entorno
+- Razonan sobre las siguientes acciones
+- Ejecutan tareas sin entrada continua humana
+- Aprenden del feedback y mejoran
+
+## Por Qué Importa
+
+La automatización tradicional requiere programación explícita de cada paso. Los agentes IA pueden manejar situaciones noveles razonando sobre ellas, haciéndolos mucho más flexibles que los scripts tradicionales.
+
+## Construyendo Tu Primer Agente
+
+### 1. Arquitectura Core
+
+\`\`\`typescript
+interface AgentConfig {
+  model: string;
+  maxSteps: number;
+  tools: Tool[];
+  verbose?: boolean;
+}
+
+class AIAgent {
+  private config: AgentConfig;
+  private memory: Message[] = [];
+
+  constructor(config: AgentConfig) {
+    this.config = config;
+  }
+
+  async execute(task: string): Promise<string> {
+    this.memory.push({ role: 'user', content: task });
+    
+    for (let step = 0; step < this.config.maxSteps; step++) {
+      const response = await this.reason();
+      
+      if (response.action === 'complete') {
+        return response.result;
+      }
+      
+      if (response.action === 'tool') {
+        const result = await this.executeTool(response.tool, response.input);
+        this.memory.push({ 
+          role: 'system', 
+          content: \`Resultado de herramienta: \${result}\` 
+        });
+      }
+    }
+    
+    throw new Error('Máximo de pasos alcanzado');
+  }
+
+  private async reason(): Promise<AgentResponse> {
+    // Usar LLM para decidir siguiente acción
+  }
+
+  private async executeTool(tool: string, input: any): Promise<string> {
+    // Ejecutar la herramienta elegida
+  }
+}
+\`\`\`
+
+### 2. Definir Herramientas
+
+\`\`\`typescript
+const tools = [
+  {
+    name: 'read_file',
+    description: 'Leer un archivo del sistema',
+    parameters: {
+      path: { type: 'string', required: true }
+    }
+  },
+  {
+    name: 'write_file',
+    description: 'Escribir contenido a un archivo',
+    parameters: {
+      path: { type: 'string', required: true },
+      content: { type: 'string', required: true }
+    }
+  },
+  {
+    name: 'run_command',
+    description: 'Ejecutar un comando de shell',
+    parameters: {
+      command: { type: 'string', required: true },
+      cwd: { type: 'string', required: false }
+    }
+  },
+  {
+    name: 'search_code',
+    description: 'Buscar patrones de código',
+    parameters: {
+      query: { type: 'string', required: true },
+      fileType: { type: 'string', required: false }
+    }
+  }
+];
+\`\`\`
+
+### 3. Implementar Ejecución de Herramientas
+
+\`\`\`typescript
+async function executeTool(name: string, args: Record<string, any>): Promise<string> {
+  switch (name) {
+    case 'read_file':
+      return await fs.promises.readFile(args.path, 'utf-8');
+    
+    case 'write_file':
+      await fs.promises.writeFile(args.path, args.content);
+      return 'Archivo escrito exitosamente';
+    
+    case 'run_command':
+      const { stdout, stderr } = await exec(args.command, { cwd: args.cwd });
+      return stdout || stderr;
+    
+    case 'search_code':
+      // Implementar lógica de búsqueda
+      return JSON.stringify(results);
+    
+    default:
+      throw new Error(\`Herrameinta desconocida: \${name}\`);
+  }
+}
+\`\`\`
+
+### 4. Crear Agentes Especializados
+
+\`\`\`typescript
+// Agente de Revisión de Código
+const reviewAgent = new AIAgent({
+  model: 'gpt-4',
+  maxSteps: 10,
+  tools: [read_file, search_code, run_command]
+});
+
+// Agente de Despliegue
+const deployAgent = new AIAgent({
+  model: 'gpt-4',
+  maxSteps: 15,
+  tools: [read_file, write_file, run_command]
+});
+
+// Agente de Testing
+const testAgent = new AIAgent({
+  model: 'gpt-4',
+  maxSteps: 20,
+  tools: [read_file, write_file, run_command, search_code]
+});
+\`\`\`
+
+## Casos de Uso
+
+- 🔍 **Revisión Automática de Código**: Revisar PRs, sugerir mejoras
+- 🚀 **Automatización CI/CD**: Manejar despliegues, rollbacks
+- 🐛 **Detección de Bugs**: Encontrar y sugerir soluciones
+- 📝 **Documentación**: Generar docs desde código
+- 🧪 **Testing**: Crear y ejecutar suites de pruebas
+
+## Pros y Contras
+
+**Pros:**
+- ✅ Maneja tareas complejas de múltiples pasos
+- ✅ Se adapta a situaciones nuevas
+- ✅ Reduce intervención manual
+- ✅ Escala a través de proyectos
+
+**Contras:**
+- ❌ Puede cometer errores
+- ❌ Requiere monitoreo cuidadoso
+- ❌ Puede necesitar verificación humana
+- ❌ Cuesta más que automatización simple
+
+## Conclusión
+
+Los agentes IA están transformando cómo trabajamos. Comienza con agentes simples que manejen una tarea bien, luego expande a flujos de trabajo más complejos. La clave es encontrar el equilibrio correcto entre autonomía y supervisión.
+
+El futuro del desarrollo es asistido por agentes. ¡Comienza a construir hoy! 🤖`,
+    },
+    category: "automation",
+    tags: ["ai-agents", "automation", "workflows", "autonomous", "productivity"],
+    author: "DevAI Team",
+    publishedAt: "2026-04-18",
+    featured: true,
+    image: "",
+  },
+  {
+    slug: "prompt-engineering-complete-guide",
+    title: {
+      en: "Complete Guide to Prompt Engineering for Developers",
+      es: "Guía Completa de Prompt Engineering para Developers",
+    },
+    excerpt: {
+      en: "Master the art of writing effective prompts. Learn techniques to get better results from any LLM.",
+      es: "Domina el arte de escribir prompts efectivos. Aprende técnicas para obtener mejores resultados de cualquier LLM.",
+    },
+    content: {
+      en: `## Introduction
+
+Prompt engineering is the skill of crafting inputs that get the best outputs from AI models. As developers, understanding these techniques can dramatically improve your AI-powered applications.
+
+This guide covers everything from basic principles to advanced techniques.
+
+## Why Prompt Engineering Matters
+
+The same model can give dramatically different results based on how you phrase your prompt. Good prompts can mean the difference between useless output and production-ready code.
+
+## Core Principles
+
+### 1. Be Specific
+
+\`\`\`python
+# ❌ Bad prompt
+"Write a function"
+
+# ✅ Good prompt
+"Write a Python function that takes a list of numbers and returns the median value. 
+Handle edge cases like empty lists and even-length arrays."
+\`\`\`
+
+### 2. Provide Context
+
+\`\`\`python
+# ❌ Bad prompt
+"Explain async/await"
+
+# ✅ Good prompt
+"Explain async/await in JavaScript to a beginner who knows synchronous code.
+Use everyday analogies and include a practical example for making API calls."
+\`\`\`
+
+### 3. Define the Output Format
+
+\`\`\`python
+# ❌ Bad prompt
+"List best practices"
+
+# ✅ Good prompt
+"List 5 best practices for React state management in JSON format:
+[
+  {
+    "practice": "name",
+    "reason": "why it matters",
+    "example": "code snippet"
+  }
+]"
+\`\`\`
+
+## Advanced Techniques
+
+### Chain of Thought
+
+\`\`\`python
+prompt = """
+Solve this problem step by step, showing your reasoning:
+
+A store sells items for $10 each. If you buy 5 items, you get a 20% discount.
+If you have a $30 gift card, how many items can you buy?
+
+Let's think through this step by step:
+"""
+
+# Model will show reasoning before final answer
+\`\`\`
+
+### Few-Shot Learning
+
+\`\`\`python
+prompt = """
+Classify the sentiment of these sentences as positive, negative, or neutral:
+
+Sentence: "This product exceeded my expectations" -> positive
+Sentence: "The app keeps crashing" -> negative  
+Sentence: "I received the package" -> neutral
+Sentence: "Best purchase ever!" ->
+"""
+\`\`\`
+
+### System Prompts
+
+\`\`\`typescript
+const messages = [
+  {
+    role: 'system',
+    content: \`You are a senior software architect with 20 years of experience.
+Your coding style follows SOLID principles.
+You always consider performance and maintainability.
+When providing code, explain the design decisions.\`
+  },
+  {
+    role: 'user',
+    content: 'How should I structure a Node.js API?'
+  }
+];
+\`\`\`
+
+### Constraining Outputs
+
+\`\`\`python
+prompt = """
+Generate a JSON object with a developer's profile.
+Only include these fields: name, skills (array), yearsExperience (number).
+Must be valid JSON. No additional text.
+"""
+\`\`\`
+
+## Common Patterns
+
+### 1. Role Playing
+
+\`\`\`python
+prompt = "Act as a senior DevOps engineer with expertise in Kubernetes.
+Review this Dockerfile and suggest improvements for production use."
+\`\`\`
+
+### 2. Iterative Refinement
+
+\`\`\`python
+# First prompt
+"Write a Python script to fetch data from an API"
+
+# Follow-up
+"That's good, but also add error handling and retry logic"
+
+# Another follow-up
+"Now wrap it in a class with proper type hints"
+\`\`\`
+
+### 3. Template Variables
+
+\`\`\`python
+def generate_prompt(template: str, **kwargs) -> str:
+    return template.format(**kwargs)
+
+prompt = generate_prompt(
+    "Write a {language} function to {task}. Consider {constraint}.",
+    language="TypeScript",
+    task="validate an email address",
+    constraint="security best practices"
+)
+\`\`\`
+
+## Testing and Optimization
+
+### A/B Testing Prompts
+
+\`\`\`python
+variants = [
+    "Write clean, documented code",
+    "Write clean, documented code following PEP8",
+    "Write clean, documented code. Use type hints. Add docstrings."
+]
+
+results = [evaluate(generate(v)) for v in variants]
+best = max(results, key=lambda x: x.score)
+\`\`\`
+
+### Measuring Quality
+
+- Consistency: Same prompt → same quality output
+- Accuracy: Correct information
+- Usefulness: Actionable results
+- Safety: No harmful content
+
+## Use Cases
+
+- 💻 **Code Generation**: Better, more accurate code
+- 📝 **Documentation**: Clear, consistent docs
+- 🐛 **Debugging**: More helpful error explanations
+- 📊 **Data Processing**: Consistent transformations
+
+## Pros and Cons
+
+**Pros:**
+- ✅ Improves AI output quality dramatically
+- ✅ No technical changes needed
+- ✅ Works with any LLM
+- ✅ Learnable skill
+
+**Cons:**
+- ❌ Can be trial and error
+- ❌ May need iteration
+- ❌ Model-specific nuances
+- ❌ Not a substitute for good architecture
+
+## Conclusion
+
+Prompt engineering is an essential skill for developers working with AI. Start with clear, specific prompts and iterate based on results. The techniques in this guide will help you get much better outputs from any LLM.
+
+Practice makes perfect. The more you prompt, the better you'll become! 📝`,
+      es: `## Introducción
+
+El prompt engineering es la habilidad de crear entradas que obtienen los mejores resultados de los modelos de IA. Como developers, entender estas técnicas puede mejorar dramáticamente tus aplicaciones potenciadas con IA.
+
+Esta guía cubre todo desde principios básicos hasta técnicas avanzadas.
+
+## Por Qué Importa el Prompt Engineering
+
+El mismo modelo puede dar resultados dramáticamente diferentes dependiendo de cómo phrases tu prompt. Los buenos prompts pueden significar la diferencia entre salida inútil y código listo para producción.
+
+## Principios Core
+
+### 1. Sé Específico
+
+\`\`\`python
+# ❌ Malo
+"Escribe una función"
+
+# ✅ Bueno
+"Escribe una función de Python que tome una lista de números y devuelva el valor de la mediana.
+Maneja casos extremos como listas vacías y arrays de longitud par."
+\`\`\`
+
+### 2. Proporciona Contexto
+
+\`\`\`python
+# ❌ Malo
+"Explica async/await"
+
+# ✅ Bueno
+"Explica async/await en JavaScript para un principiante que conoce código síncrono.
+Usa analogías cotidianas e incluye un ejemplo práctico para hacer llamadas API."
+\`\`\`
+
+### 3. Define el Formato de Salida
+
+\`\`\`python
+# ❌ Malo
+"Lista mejores prácticas"
+
+# ✅ Bueno
+"Lista 5 mejores prácticas para estado en React en formato JSON:
+[
+  {
+    "practice": "nombre",
+    "reason": "por qué importa",
+    "example": "snippet de código"
+  }
+]"
+\`\`\`
+
+## Técnicas Avanzadas
+
+### Chain of Thought
+
+\`\`\`python
+prompt = """
+Resuelve este problema paso a paso, mostrando tu razonamiento:
+
+Una tienda vende artículos por $10 cada uno. Si compras 5 artículos, obtienes 20% de descuento.
+Si tienes una tarjeta de regalo de $30, ¿cuántos artículos puedes comprar?
+
+Pensemos esto paso a paso:
+"""
+
+# El modelo mostrará razonamiento antes de la respuesta final
+\`\`\`
+
+### Few-Shot Learning
+
+\`\`\`python
+prompt = """
+Clasifica el sentimiento de estas oraciones como positivo, negativo o neutral:
+
+Oración: "Este producto excedió mis expectativas" -> positivo
+Oración: "La app sigue fallando" -> negativo  
+Oración: "Recibí el paquete" -> neutral
+Oración: "¡Mejor compra de todas!" ->
+"""
+\`\`\`
+
+### System Prompts
+
+\`\`\`typescript
+const messages = [
+  {
+    role: 'system',
+    content: \`Eres un arquitecto de software senior con 20 años de experiencia.
+Tu estilo de código sigue principios SOLID.
+Siempre consideras rendimiento y mantenibilidad.
+Al proporcionar código, explica las decisiones de diseño.\`
+  },
+  {
+    role: 'user',
+    content: '¿Cómo debería estructurar una API en Node.js?'
+  }
+];
+\`\`\`
+
+### Restringir Salidas
+
+\`\`\`python
+prompt = """
+Genera un objeto JSON con el perfil de un developer.
+Solo incluye estos campos: name, skills (array), yearsExperience (number).
+Debe ser JSON válido. Sin texto adicional.
+"""
+\`\`\`
+
+## Patrones Comunes
+
+### 1. Role Playing
+
+\`\`\`python
+prompt = "Actúa como un ingeniero DevOps senior con experiencia en Kubernetes.
+Revisa este Dockerfile y sugiere mejoras para uso en producción."
+\`\`\`
+
+### 2. Refinamiento Iterativo
+
+\`\`\`python
+# Primer prompt
+"Escribe un script de Python para obtener datos de una API"
+
+# Seguimiento
+"Eso está bien, pero también agrega manejo de errores y lógica de reintentos"
+
+# Otro seguimiento
+"Ahora envuélvelo en una clase con type hints apropiados"
+\`\`\`
+
+### 3. Variables de Template
+
+\`\`\`python
+def generate_prompt(template: str, **kwargs) -> str:
+    return template.format(**kwargs)
+
+prompt = generate_prompt(
+    "Escribe una función en {language} para {task}. Considera {constraint}.",
+    language="TypeScript",
+    task="validar un correo electrónico",
+    constraint="mejores prácticas de seguridad"
+)
+\`\`\`
+
+## Testing y Optimización
+
+### A/B Testing de Prompts
+
+\`\`\`python
+variants = [
+    "Escribe código limpio y documentado",
+    "Escribe código limpio y documentado siguiendo PEP8",
+    "Escribe código limpio y documentado. Usa type hints. Agrega docstrings."
+]
+
+results = [evaluate(generate(v)) for v in variants]
+best = max(results, key=lambda x: x.score)
+\`\`\`
+
+### Midiendo Calidad
+
+- Consistencia: Mismo prompt → misma calidad de salida
+- Precisión: Información correcta
+- Utilidad: Resultados accionables
+- Seguridad: Sin contenido dañino
+
+## Casos de Uso
+
+- 💻 **Generación de Código**: Código mejor y más preciso
+- 📝 **Documentación**: Docs claras y consistentes
+- 🐛 **Debugging**: Explicaciones de errores más útiles
+- 📊 **Procesamiento de Datos**: Transformaciones consistentes
+
+## Pros y Contras
+
+**Pros:**
+- ✅ Mejora dramáticamente la calidad de salida de IA
+- ✅ No necesita cambios técnicos
+- ✅ Funciona con cualquier LLM
+- ✅ Habilidad aprendible
+
+**Contras:**
+- ❌ Puede ser prueba y error
+- ❌ Puede necesitar iteración
+- ❌ Matices específicos del modelo
+- ❌ No es sustituto de buena arquitectura
+
+## Conclusión
+
+El prompt engineering es una habilidad esencial para developers trabajando con IA. Comienza con prompts claros y específicos e itera basándote en los resultados. Las técnicas en esta guía te ayudaran a obtener mejores resultados de cualquier LLM.
+
+La práctica hace al maestro. ¡Cuanto más prompts hagas, mejor te volveras! 📝`,
+    },
+    category: "guides",
+    tags: ["prompt-engineering", "ai", "guides", "productivity", "llm"],
+    author: "DevAI Team",
+    publishedAt: "2026-04-18",
+    featured: false,
+    image: "",
+  },
+  {
+    slug: "ai-code-comparison-2026",
+    title: {
+      en: "Best AI Code Assistants in 2026: Complete Comparison",
+      es: "Mejores Asistentes de Código IA en 2026: Comparativa Completa",
+    },
+    excerpt: {
+      en: "Compare GitHub Copilot, Cursor, Claude Code, and more. Find the perfect AI coding assistant for your workflow.",
+      es: "Compara GitHub Copilot, Cursor, Claude Code y más. Encuentra el asistente de código IA perfecto para tu flujo de trabajo.",
+    },
+    content: {
+      en: `## Introduction
+
+The AI coding assistant landscape has evolved dramatically. In 2026, developers have more options than ever. This guide helps you choose the right tool for your needs.
+
+## The Contenders
+
+| Assistant | Best For | Pricing | Strength |
+|-----------|----------|---------|----------|
+| GitHub Copilot | General coding | $10/mo | IDE integration |
+| Cursor | Full IDE replacement | $19/mo | AI-native experience |
+| Claude Code | Complex reasoning | $20/mo | Code understanding |
+| Windsurf | Flow state | $10/mo | Minimal context switching |
+
+## Deep Dive Analysis
+
+### GitHub Copilot
+
+**Strengths:**
+- Best VS Code/Visual Studio integration
+- Works in 10+ IDEs
+- Good for straightforward tasks
+- Widely adopted in enterprises
+
+**Weaknesses:**
+- Limited customization
+- Can suggest outdated patterns
+- Less capable for complex refactoring
+
+**Best for:** Developers who want AI assistance without changing their workflow.
+
+\`\`\`javascript
+// Copilot works well for:
+- Boilerplate code
+- Test generation  
+- Documentation comments
+- Simple refactoring
+\`\`\`
+
+### Cursor
+
+**Strengths:**
+- AI-first IDE built on VS Code
+- Excellent context awareness
+- Powerful chat interface
+- Strong refactoring capabilities
+
+**Weaknesses:**
+- More expensive
+- Somewhat steeper learning curve
+- Occasional sync issues
+
+**Best for:** Developers who want the most powerful AI coding experience.
+
+\`\`\`typescript
+// Cursor excels at:
+// - Multi-file editing
+// - Context-aware suggestions
+// - Complex refactoring
+// - Explaining large codebases
+\`\`\`
+
+### Claude Code
+
+**Strengths:**
+- Best at understanding complex code
+- Excellent for debugging
+- Strong reasoning capabilities
+- Great CLI integration
+
+**Weaknesses:**
+- Doesn't have built-in editor integration
+- Requires more explicit prompts
+- Smaller plugin ecosystem
+
+**Best for:** Developers who value code understanding and complex problem solving.
+
+\`\`\`python
+# Claude Code shines when:
+# - Debugging tricky issues
+# - Understanding unfamiliar code
+# - Writing complex algorithms
+# - Code review and explanation
+\`\`\`
+
+### Windsurf
+
+**Strengths:**
+- Designed for flow state
+- Minimal context switching
+- Fast and responsive
+- Good for quick edits
+
+**Weaknesses:**
+- Newer, less mature
+- Smaller feature set
+- Limited extensibility
+
+**Best for:** Developers who want AI help without interruptions.
+
+## Feature Comparison
+
+| Feature | Copilot | Cursor | Claude | Windsurf |
+|---------|---------|--------|--------|----------|
+| Inline suggestions | ✅ | ✅ | ❌ | ✅ |
+| Chat interface | ✅ | ✅ | ✅ | ✅ |
+| Multi-file editing | ❌ | ✅ | ❌ | ✅ |
+| Terminal integration | ❌ | ✅ | ✅ | ✅ |
+| Custom rules | ✅ | ✅ | ✅ | ❌ |
+| Offline mode | ✅ | ❌ | ❌ | ❌ |
+
+## Pricing Analysis
+
+**Monthly cost for individual developers:**
+
+- GitHub Copilot: $10/month
+- Cursor: $19/month  
+- Claude Code: $20/month
+- Windsurf: $10/month
+
+**Annual savings with annual billing:** 20-30% off
+
+## Making Your Choice
+
+### Choose Copilot if:
+- You're new to AI coding assistants
+- You use multiple IDEs
+- Enterprise compliance matters
+- You want the simplest integration
+
+### Choose Cursor if:
+- You want the most powerful AI IDE
+- You're willing to invest time in learning
+- You do complex refactoring often
+- Multi-file editing is important
+
+### Choose Claude Code if:
+- Code understanding is critical
+- You're working on complex problems
+- CLI-first workflow suits you
+- Debugging is your main pain point
+
+### Choose Windsurf if:
+- You value uninterrupted flow
+- Quick edits are your workflow
+- You prefer simplicity
+- You're on a budget
+
+## Pros and Cons Summary
+
+### GitHub Copilot
+- ✅ Best integration
+- ✅ Widely supported
+- ✅ Enterprise-ready
+- ❌ Limited power
+- ❌ Generic suggestions
+
+### Cursor
+- ✅ Most powerful
+- ✅ AI-native
+- ✅ Great refactoring
+- ❌ Expensive
+- ❌ Learning curve
+
+### Claude Code
+- ✅ Best reasoning
+- ✅ Great debugging
+- ✅ CLI-first
+- ❌ No native IDE
+- ❌ Requires prompts
+
+### Windsurf
+- ✅ Flow-friendly
+- ✅ Fast
+- ✅ Simple
+- ❌ Less mature
+- ❌ Limited features
+
+## Conclusion
+
+There's no single "best" AI coding assistant. The right choice depends on your specific needs, workflow, and budget. Many developers use multiple tools for different tasks.
+
+Start with one, master it, and don't be afraid to switch if your needs change. The best tool is the one that makes you more productive! 🚀`,
+      es: `## Introducción
+
+El panorama de asistentes de código IA ha evolucionado dramáticamente. En 2026, los developers tienen más opciones que nunca. Esta guía te ayuda a elegir la herramienta correcta para tus necesidades.
+
+## Los Competidores
+
+| Asistente | Mejor Para | Precio | Fortaleza |
+|-----------|-----------|--------|-----------|
+| GitHub Copilot | Coding general | $10/mes | Integración IDE |
+| Cursor | Reemplazo de IDE | $19/mes | Experiencia IA-native |
+| Claude Code | Razonamiento complejo | $20/mes | Entendimiento de código |
+| Windsurf | Estado de flujo | $10/mes | Cambio mínimo de contexto |
+
+## Análisis Profundo
+
+### GitHub Copilot
+
+**Fortalezas:**
+- Mejor integración con VS Code/Visual Studio
+- Funciona en 10+ IDEs
+- Bueno para tareas directas
+- Ampliamente adoptado en empresas
+
+**Debilidades:**
+- Personalización limitada
+- Puede sugerir patrones desactualizados
+- Menos capaz para refactoring complejo
+
+**Mejor para:** Developers que quieren asistencia IA sin cambiar su flujo de trabajo.
+
+\`\`\`javascript
+// Copilot funciona bien para:
+- Código boilerplate
+- Generación de tests  
+- Comentarios de documentación
+- Refactoring simple
+\`\`\`
+
+### Cursor
+
+**Fortalezas:**
+- IDE IA-first construido sobre VS Code
+- Excelente conciencia de contexto
+- Interfaz de chat poderosa
+- Fuertes capacidades de refactoring
+
+**Debilidades:**
+- Más caro
+- Curva de aprendizaje más pronunciada
+- Ocasionales problemas de sincronización
+
+**Mejor para:** Developers que quiere la experiencia de código IA más poderosa.
+
+\`\`\`typescript
+// Cursor destaca en:
+// - Edición multi-archivo
+// - Sugerencias conscientes del contexto
+// - Refactoring complejo
+// - Explicar bases de código grandes
+\`\`\`
+
+### Claude Code
+
+**Fortalezas:**
+- Mejor comprensión de código complejo
+- Excelente para debugging
+- Fuertes capacidades de razonamiento
+- Gran integración CLI
+
+**Debilidades:**
+- No tiene integración de editor nativa
+- Requiere prompts más explícitos
+- Ecosistema de plugins más pequeño
+
+**Mejor para:** Developers que valoran entendimiento de código y resolución de problemas complejos.
+
+\`\`\`python
+# Claude Code brilla cuando:
+# - Debugging de problemas difíciles
+# - Entender código desconhecido
+# - Escribir algoritmos complejos
+# - Revisión y explicación de código
+\`\`\`
+
+### Windsurf
+
+**Fortalezas:**
+- Diseñado para estado de flujo
+- Cambio mínimo de contexto
+- Rápido y responsivo
+- Bueno para ediciones rápidas
+
+**Debilidades:**
+- Más nuevo, menos maduro
+- Conjunto de features más pequeño
+- Extensibilidad limitada
+
+**Mejor para:** Developers que quieren ayuda IA sin interrupciones.
+
+## Comparación de Features
+
+| Feature | Copilot | Cursor | Claude | Windsurf |
+|---------|---------|--------|--------|----------|
+| Sugerencias inline | ✅ | ✅ | ❌ | ✅ |
+| Interfaz de chat | ✅ | ✅ | ✅ | ✅ |
+| Edición multi-archivo | ❌ | ✅ | ❌ | ✅ |
+| Integración terminal | ❌ | ✅ | ✅ | ✅ |
+| Reglas custom | ✅ | ✅ | ✅ | ❌ |
+| Modo offline | ✅ | ❌ | ❌ | ❌ |
+
+## Análisis de Precios
+
+**Costo mensual para developers individuales:**
+
+- GitHub Copilot: $10/mes
+- Cursor: $19/mes  
+- Claude Code: $20/mes
+- Windsurf: $10/mes
+
+**Ahorro anual con facturación anual:** 20-30% descuento
+
+## Tomando Tu Decisión
+
+### Elige Copilot si:
+- Eres nuevo en asistentes de código IA
+- Usas múltiples IDEs
+- El cumplimiento empresarial importa
+- Quieres la integración más simple
+
+### Elige Cursor si:
+- Quieres el IDE IA más poderoso
+- Estás dispuesto a invertir tiempo en aprender
+- Haces refactoring complejo a menudo
+- La edición multi-archivo es importante
+
+### Elige Claude Code si:
+- El entendimiento de código es crítico
+- Estás trabajando en problemas complejos
+- Un flujo de trabajo CLI-first te suits
+- El debugging es tu principal dolor
+
+### Elige Windsurf si:
+- Valoraras flujo ininterrumpido
+- Las ediciones rápidas son tu flujo
+- Prefieres simplicidad
+- Estás en presupuesto
+
+## Resumen de Pros y Contras
+
+### GitHub Copilot
+- ✅ Mejor integración
+- ✅ Ampliamente soportado
+- ✅ Listo para empresas
+- ❌ Potencia limitada
+- ❌ Sugerencias genéricas
+
+### Cursor
+- ✅ Más poderoso
+- ✅ IA-native
+- ✅ Gran refactoring
+- ❌ Caro
+- ❌ Curva de aprendizaje
+
+### Claude Code
+- ✅ Mejor razonamiento
+- ✅ Gran debugging
+- ✅ CLI-first
+- ❌ Sin IDE nativa
+- ❌ Requiere prompts
+
+### Windsurf
+- ✅ Amigable al flujo
+- ✅ Rápido
+- ✅ Simple
+- ❌ Menos maduro
+- ❌ Features limitadas
+
+## Conclusión
+
+No hay un solo "mejor" asistente de código IA. La elección correcta depende de tus necesidades específicas, flujo de trabajo y presupuesto. Muchos developers usan múltiples herramientas para diferentes tareas.
+
+Comienza con una, domínala, y no temas cambiar si tus necesidades cambian. ¡La mejor herramienta es la que te hace más productivo! 🚀`,
+    },
+    category: "guides",
+    tags: ["comparison", "copilot", "cursor", "claude", "ai-tools", "productivity"],
+    author: "DevAI Team",
+    publishedAt: "2026-04-18",
+    featured: true,
+    image: "",
+  },
+  {
+    slug: "typescript-ai-integration-patterns",
+    title: {
+      en: "Advanced TypeScript Patterns for AI Integration",
+      es: "Patrones Avanzados de TypeScript para Integración de IA",
+    },
+    excerpt: {
+      en: "Learn production-ready patterns for integrating AI into your TypeScript applications with type safety and maintainability.",
+      es: "Aprende patrones listos para producción para integrar IA en tus aplicaciones TypeScript con type safety y mantenibilidad.",
+    },
+    content: {
+      en: `## Introduction
+
+Integrating AI into TypeScript applications requires thoughtful architecture. This guide covers patterns that ensure type safety, maintainability, and scalability.
+
+## Why Type Safety Matters for AI
+
+AI responses are inherently unpredictable. Strong typing helps:
+- Catch errors at compile time
+- Document expected response structures
+- Enable better IDE autocomplete
+- Make refactoring safer
+
+## Core Patterns
+
+### 1. Response Type Safety
+
+\`\`\`typescript
+// Define expected response shapes
+interface AIResponse<T> {
+  content: T;
+  usage: {
+    promptTokens: number;
+    completionTokens: number;
+    totalTokens: number;
+  };
+  model: string;
+  finishReason: 'stop' | 'length' | 'content_filter' | 'error';
+}
+
+// Use discriminated unions for different response types
+type CompletionResult<T> = 
+  | { success: true; data: AIResponse<T> }
+  | { success: false; error: string; retryable: boolean };
+
+async function generateWithRetry<T>(
+  prompt: string,
+  maxRetries: number = 3
+): Promise<CompletionResult<T>> {
+  // Implementation with retry logic
+}
+\`\`\`
+
+### 2. Streaming Response Handling
+
+\`\`\`typescript
+interface StreamChunk<T> {
+  delta: T;
+  done: boolean;
+}
+
+async function* streamCompletion<T>(
+  prompt: string,
+  schema?: z.ZodSchema<T>
+): AsyncGenerator<StreamChunk<T>> {
+  const response = await openai.chat.completions.create({
+    model: 'gpt-4',
+    messages: [{ role: 'user', content: prompt }],
+    stream: true,
+  });
+
+  let accumulated = '';
+
+  for await (const chunk of response) {
+    const content = chunk.choices[0]?.delta?.content || '';
+    accumulated += content;
+
+    if (schema) {
+      // Try to parse partial response
+      const result = safeParse(accumulated, schema);
+      if (result.success) {
+        yield { delta: result.data, done: false };
+      }
+    } else {
+      yield { delta: content as T, done: false };
+    }
+  }
+
+  yield { delta: '' as T, done: true };
+}
+\`\`\`
+
+### 3. Tool/Function Calling Pattern
+
+\`\`\`typescript
+// Define tools with full type safety
+const tools = {
+  readFile: {
+    name: 'readFile',
+    description: 'Read a file from the filesystem',
+    parameters: z.object({
+      path: z.string(),
+      encoding: z.enum(['utf-8', 'base64']).default('utf-8'),
+    }),
+    handler: async (params: z.infer<typeof tools.readFile.parameters>) => {
+      return await fs.promises.readFile(params.path, params.encoding);
+    },
+  },
+
+  searchCode: {
+    name: 'searchCode',
+    description: 'Search for code patterns in files',
+    parameters: z.object({
+      query: z.string(),
+      filePattern: z.string().optional(),
+      maxResults: z.number().default(10),
+    }),
+    handler: async (params: z.infer<typeof tools.searchCode.parameters>) => {
+      return await searchCodebase(params.query, params.filePattern);
+    },
+  },
+};
+
+// Type-safe tool execution
+async function executeTool(
+  toolName: keyof typeof tools,
+  params: unknown
+): Promise<string> {
+  const tool = tools[toolName];
+  const validatedParams = tool.parameters.parse(params);
+  return await tool.handler(validatedParams);
+}
+\`\`\`
+
+### 4. Context Management
+
+\`\`\`typescript
+interface AIContext {
+  systemPrompt: string;
+  conversationHistory: Message[];
+  tools: ToolDefinition[];
+  maxTokens: number;
+}
+
+class ConversationManager<T extends AIContext> {
+  private context: T;
+  private tokenCounter: TokenCounter;
+
+  constructor(initialContext: T, maxTokens: number = 128000) {
+    this.context = initialContext;
+    this.tokenCounter = new TokenCounter(maxTokens);
+  }
+
+  addMessage(role: 'user' | 'assistant', content: string): void {
+    this.context.conversationHistory.push({ role, content });
+    this.trimIfNeeded();
+  }
+
+  private trimIfNeeded(): void {
+    while (this.tokenCounter.estimate(this.context.conversationHistory) > 
+           this.context.maxTokens * 0.8) {
+      // Remove oldest messages, keep system prompt
+      this.context.conversationHistory.shift();
+    }
+  }
+
+  buildMessages(): ChatCompletionMessage[] {
+    return [
+      { role: 'system', content: this.context.systemPrompt },
+      ...this.context.conversationHistory,
+    ];
+  }
+}
+\`\`\`
+
+### 5. Error Handling and Retry
+
+\`\`\`typescript
+class AITransientError extends Error {
+  constructor(message: string, public readonly retryAfter?: number) {
+    super(message);
+    this.name = 'AITransientError';
+  }
+}
+
+async function withExponentialBackoff<T>(
+  fn: () => Promise<T>,
+  maxRetries: number = 3,
+  baseDelay: number = 1000
+): Promise<T> {
+  let lastError: Error | undefined;
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error as Error;
+
+      if (error instanceof AITransientError && error.retryAfter) {
+        await sleep(error.retryAfter);
+      } else if (isRetryableError(error)) {
+        const delay = baseDelay * Math.pow(2, attempt);
+        await sleep(delay + Math.random() * 1000);
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  throw lastError;
+}
+\`\`\`
+
+### 6. Caching Pattern
+
+\`\`\`typescript
+interface CacheEntry<T> {
+  value: T;
+  timestamp: number;
+  ttl: number;
+}
+
+class SemanticCache<T> {
+  private store = new Map<string, CacheEntry<T>>();
+
+  async getOrCompute(
+    key: string,
+    compute: () => Promise<T>,
+    ttl: number = 3600000
+  ): Promise<T> {
+    const existing = this.store.get(key);
+    
+    if (existing && Date.now() - existing.timestamp < ttl) {
+      return existing.value;
+    }
+
+    const value = await compute();
+    this.store.set(key, { value, timestamp: Date.now(), ttl });
+    return value;
+  }
+
+  // Semantic matching with embeddings
+  async findSimilar(query: string, threshold: number = 0.9): Promise<T | null> {
+    const queryEmbedding = await getEmbedding(query);
+    
+    for (const [key, entry] of this.store) {
+      const keyEmbedding = await getEmbedding(key);
+      const similarity = cosineSimilarity(queryEmbedding, keyEmbedding);
+      
+      if (similarity >= threshold) {
+        return entry.value;
+      }
+    }
+    
+    return null;
+  }
+}
+\`\`\`
+
+## Best Practices
+
+1. **Always validate AI responses** - Never trust raw AI output
+2. **Implement proper error handling** - AI APIs can fail in various ways
+3. **Use streaming for better UX** - Users prefer seeing incremental results
+4. **Cache aggressively** - AI API calls are expensive
+5. **Monitor token usage** - Keep track of costs
+6. **Implement idempotency** - Same prompts should produce consistent results
+
+## Use Cases
+
+- 🤖 **AI Agents**: Type-safe tool execution
+- 💬 **Chatbots**: Conversation state management
+- 📝 **Code Generation**: Response validation
+- 🔍 **Semantic Search**: Caching embeddings
+- 🎨 **Content Generation**: Streaming responses
+
+## Conclusion
+
+TypeScript's type system is a powerful tool for AI integration. These patterns help you build robust, maintainable AI-powered applications that scale.
+
+Start with basic patterns and add complexity as needed. The key is catching errors at compile time rather than runtime! 🚀`,
+      es: `## Introducción
+
+Integrar IA en aplicaciones TypeScript requiere arquitectura reflexiva. Esta guía cubre patrones que aseguran type safety, mantenibilidad y escalabilidad.
+
+## Por Qué Type Safety Importa para IA
+
+Las respuestas de IA son inherentemente impredecibles. Typing fuerte ayuda a:
+- Atrapar errores en tiempo de compilación
+- Documentar estructuras de respuesta esperadas
+- Habilitar mejor autocomplete del IDE
+- Hacer refactoring más seguro
+
+## Patrones Core
+
+### 1. Safety de Tipo de Respuesta
+
+\`\`\`typescript
+// Define formas de respuesta esperadas
+interface AIResponse<T> {
+  content: T;
+  usage: {
+    promptTokens: number;
+    completionTokens: number;
+    totalTokens: number;
+  };
+  model: string;
+  finishReason: 'stop' | 'length' | 'content_filter' | 'error';
+}
+
+// Usa discriminated unions para diferentes tipos de respuesta
+type CompletionResult<T> = 
+  | { success: true; data: AIResponse<T> }
+  | { success: false; error: string; retryable: boolean };
+
+async function generateWithRetry<T>(
+  prompt: string,
+  maxRetries: number = 3
+): Promise<CompletionResult<T>> {
+  // Implementación con lógica de reintento
+}
+\`\`\`
+
+### 2. Manejo de Respuestas en Streaming
+
+\`\`\`typescript
+interface StreamChunk<T> {
+  delta: T;
+  done: boolean;
+}
+
+async function* streamCompletion<T>(
+  prompt: string,
+  schema?: z.ZodSchema<T>
+): AsyncGenerator<StreamChunk<T>> {
+  const response = await openai.chat.completions.create({
+    model: 'gpt-4',
+    messages: [{ role: 'user', content: prompt }],
+    stream: true,
+  });
+
+  let accumulated = '';
+
+  for await (const chunk of response) {
+    const content = chunk.choices[0]?.delta?.content || '';
+    accumulated += content;
+
+    if (schema) {
+      // Intentar parsear respuesta parcial
+      const result = safeParse(accumulated, schema);
+      if (result.success) {
+        yield { delta: result.data, done: false };
+      }
+    } else {
+      yield { delta: content as T, done: false };
+    }
+  }
+
+  yield { delta: '' as T, done: true };
+}
+\`\`\`
+
+### 3. Patrón de Tool/Function Calling
+
+\`\`\`typescript
+// Define herramientas con type safety completo
+const tools = {
+  readFile: {
+    name: 'readFile',
+    description: 'Lee un archivo del sistema de archivos',
+    parameters: z.object({
+      path: z.string(),
+      encoding: z.enum(['utf-8', 'base64']).default('utf-8'),
+    }),
+    handler: async (params: z.infer<typeof tools.readFile.parameters>) => {
+      return await fs.promises.readFile(params.path, params.encoding);
+    },
+  },
+
+  searchCode: {
+    name: 'searchCode',
+    description: 'Busca patrones de código en archivos',
+    parameters: z.object({
+      query: z.string(),
+      filePattern: z.string().optional(),
+      maxResults: z.number().default(10),
+    }),
+    handler: async (params: z.infer<typeof tools.searchCode.parameters>) => {
+      return await searchCodebase(params.query, params.filePattern);
+    },
+  },
+};
+
+// Ejecución de herramienta type-safe
+async function executeTool(
+  toolName: keyof typeof tools,
+  params: unknown
+): Promise<string> {
+  const tool = tools[toolName];
+  const validatedParams = tool.parameters.parse(params);
+  return await tool.handler(validatedParams);
+}
+\`\`\`
+
+### 4. Gestión de Contexto
+
+\`\`\`typescript
+interface AIContext {
+  systemPrompt: string;
+  conversationHistory: Message[];
+  tools: ToolDefinition[];
+  maxTokens: number;
+}
+
+class ConversationManager<T extends AIContext> {
+  private context: T;
+  private tokenCounter: TokenCounter;
+
+  constructor(initialContext: T, maxTokens: number = 128000) {
+    this.context = initialContext;
+    this.tokenCounter = new TokenCounter(maxTokens);
+  }
+
+  addMessage(role: 'user' | 'assistant', content: string): void {
+    this.context.conversationHistory.push({ role, content });
+    this.trimIfNeeded();
+  }
+
+  private trimIfNeeded(): void {
+    while (this.tokenCounter.estimate(this.context.conversationHistory) > 
+           this.context.maxTokens * 0.8) {
+      // Eliminar mensajes más viejos, mantener system prompt
+      this.context.conversationHistory.shift();
+    }
+  }
+
+  buildMessages(): ChatCompletionMessage[] {
+    return [
+      { role: 'system', content: this.context.systemPrompt },
+      ...this.context.conversationHistory,
+    ];
+  }
+}
+\`\`\`
+
+### 5. Manejo de Errores y Reintentos
+
+\`\`\`typescript
+class AITransientError extends Error {
+  constructor(message: string, public readonly retryAfter?: number) {
+    super(message);
+    this.name = 'AITransientError';
+  }
+}
+
+async function withExponentialBackoff<T>(
+  fn: () => Promise<T>,
+  maxRetries: number = 3,
+  baseDelay: number = 1000
+): Promise<T> {
+  let lastError: Error | undefined;
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error as Error;
+
+      if (error instanceof AITransientError && error.retryAfter) {
+        await sleep(error.retryAfter);
+      } else if (isRetryableError(error)) {
+        const delay = baseDelay * Math.pow(2, attempt);
+        await sleep(delay + Math.random() * 1000);
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  throw lastError;
+}
+\`\`\`
+
+### 6. Patrón de Cache
+
+\`\`\`typescript
+interface CacheEntry<T> {
+  value: T;
+  timestamp: number;
+  ttl: number;
+}
+
+class SemanticCache<T> {
+  private store = new Map<string, CacheEntry<T>>();
+
+  async getOrCompute(
+    key: string,
+    compute: () => Promise<T>,
+    ttl: number = 3600000
+  ): Promise<T> {
+    const existing = this.store.get(key);
+    
+    if (existing && Date.now() - existing.timestamp < ttl) {
+      return existing.value;
+    }
+
+    const value = await compute();
+    this.store.set(key, { value, timestamp: Date.now(), ttl });
+    return value;
+  }
+
+  // Matching semántico con embeddings
+  async findSimilar(query: string, threshold: number = 0.9): Promise<T | null> {
+    const queryEmbedding = await getEmbedding(query);
+    
+    for (const [key, entry] of this.store) {
+      const keyEmbedding = await getEmbedding(key);
+      const similarity = cosineSimilarity(queryEmbedding, keyEmbedding);
+      
+      if (similarity >= threshold) {
+        return entry.value;
+      }
+    }
+    
+    return null;
+  }
+}
+\`\`\`
+
+## Mejores Prácticas
+
+1. **Siempre valida respuestas de IA** - Nunca confíes en salida cruda de IA
+2. **Implementa manejo de errores adecuado** - Las APIs de IA pueden fallar de varias formas
+3. **Usa streaming para mejor UX** - Los usuarios prefieren ver resultados incrementales
+4. **Cache agresivamente** - Las llamadas a API de IA son costosas
+5. **Monitorea uso de tokens** - Mantén registro de costos
+6. **Implementa idempotencia** - Los mismos prompts deben producir resultados consistentes
+
+## Casos de Uso
+
+- 🤖 **Agentes IA**: Ejecución de herramientas type-safe
+- 💬 **Chatbots**: Gestión de estado de conversación
+- 📝 **Generación de Código**: Validación de respuestas
+- 🔍 **Búsqueda Semántica**: Cache de embeddings
+- 🎨 **Generación de Contenido**: Respuestas en streaming
+
+## Conclusión
+
+El sistema de tipos de TypeScript es una herramienta poderosa para integración de IA. Estos patrones te ayudan a construir aplicaciones robustas, mantenibles y potenciadas por IA que escalan.
+
+Comienza con patrones básicos y añade complejidad según sea necesario. ¡La clave es atrapar errores en tiempo de compilación en lugar de runtime! 🚀`,
+    },
+    category: "tutorials",
+    tags: ["typescript", "ai", "tutorial", "patterns", "integration"],
+    author: "DevAI Team",
+    publishedAt: "2026-04-18",
+    featured: false,
+    image: "",
+  },
 ];
 
 export function getPostsByLocale(locale: Locale) {
