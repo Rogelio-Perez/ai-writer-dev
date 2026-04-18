@@ -5,12 +5,15 @@ import { t, localePath, Locale } from "@/lib/i18n";
 import { Search, Menu, X, Globe, Terminal } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { getFooterLinks, getFooterCategories } from "@/data/footer";
 
 export default function BlogLayout({ children }: { children: ReactNode }) {
   const { locale } = useLocale();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const otherLocale: Locale = locale === "en" ? "es" : "en";
+  const footerLinks = getFooterLinks();
+  const footerCategories = getFooterCategories(locale);
 
   const navItems = [
     { label: t(locale, "nav.home"), path: localePath(locale, "") },
@@ -113,9 +116,9 @@ export default function BlogLayout({ children }: { children: ReactNode }) {
             <div>
               <h4 className="font-display font-semibold text-sm mb-3 text-foreground">Links</h4>
               <div className="flex flex-col gap-2">
-                {navItems.slice(0, 3).map((item) => (
-                  <Link key={item.path} to={item.path} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                    {item.label}
+                {footerLinks.map((item) => (
+                  <Link key={item.path} to={localePath(locale, item.path)} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                    {item.label[locale]}
                   </Link>
                 ))}
               </div>
@@ -123,15 +126,11 @@ export default function BlogLayout({ children }: { children: ReactNode }) {
             <div>
               <h4 className="font-display font-semibold text-sm mb-3 text-foreground">{t(locale, "section.categories")}</h4>
               <div className="flex flex-col gap-2">
-                <Link to={localePath(locale, "/blog?category=ai-tools")} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  🤖 AI Tools
-                </Link>
-                <Link to={localePath(locale, "/blog?category=tutorials")} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  📚 Tutorials
-                </Link>
-                <Link to={localePath(locale, "/blog?category=automation")} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  ⚡ Automation
-                </Link>
+                {footerCategories.map((cat) => (
+                  <Link key={cat.slug} to={localePath(locale, `/blog?category=${cat.slug}`)} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                    {cat.icon} {cat.name[locale]}
+                  </Link>
+                ))}
               </div>
             </div>
           </div>
