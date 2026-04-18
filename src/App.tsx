@@ -11,6 +11,7 @@ import BlogPostPage from "./pages/BlogPostPage";
 import CategoriesPage from "./pages/CategoriesPage";
 import NotFound from "./pages/NotFound";
 import { useEffect } from "react";
+import { Analytics } from "@vercel/analytics/react";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +50,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
+        <Analytics />
       </TooltipProvider>
     </QueryClientProvider>
   </HelmetProvider>
