@@ -4017,23 +4017,252 @@ Automated code review with AI is a game-changer for development teams. It catche
       en: "Automate your meeting notes and documentation with AI transcription and summarization.",
       es: "Automatiza tus notas de reunión y documentación con transcripción y resumen de IA.",
     },
-    content: {
+content: {
       en: `## Introduction
 
-AI can transcribe and summarize your meetings automatically.
+Meetings are essential for collaboration, but taking notes often distracts from the actual conversation. AI-powered meeting assistants can handle the note-taking for you, allowing you to focus on the discussion.
 
-## Tools
+In this guide, we'll explore how to automate your meeting notes and documentation using AI.
 
-- Ottery
-- Fireflies
-- Notion AI
+## Why AI-Powered Meeting Notes Matter
 
-## Workflow
+Traditional note-taking has several problems:
+- Missing important points while writing
+- Incomplete or inconsistent notes
+- Time spent on transcription instead of participation
+- Difficulty finding information later
 
-1. Join meeting with AI bot
-2. AI transcribes everything
-3. AI generates summary
-4. Action items extracted
+AI solves these by automatically transcribing, summarizing, and organizing your meetings.
+
+## Top AI Meeting Tools
+
+### 1. Fireflies.ai
+
+Fireflies is one of the most popular AI meeting assistants.
+
+**Features:**
+- Automatic transcription for Google Meet, Zoom, Teams
+- AI-powered summaries
+- Action item extraction
+- Search across all meetings
+
+**Pricing:** Free tier available, Pro from $10/month
+
+### 2. Notion AI
+
+Notion integrates AI directly into your workspace.
+
+**Features:**
+- AI writing assistance
+- Meeting notes templates
+- Auto-summaries of notes
+- Integration with calendar
+
+**Pricing:** Included in Notion plans from $10/user/month
+
+### 3. Ottery
+
+Ottery specializes in real-time note-taking.
+
+**Features:**
+- Real-time transcription
+- Smart templates
+- Team collaboration
+- API for custom integrations
+
+### 4. Granola
+
+Granola focuses on AI-powered notes for macOS.
+
+**Features:**
+- Native macOS integration
+- Smart summaries
+- Calendar integration
+- Easy sharing
+
+## Implementation Example
+
+### Using Fireflies API
+
+\`\`\`typescript
+// Get meeting transcript
+const meetingId = "abc123";
+
+const transcript = await fireflies.getTranscript(meetingId, {
+  includeSpeakers: true,
+  includeTimestamps: true,
+});
+
+console.log(transcript.text);
+\`\`\`
+
+### Creating a Meeting Summary Bot
+
+\`\`\`typescript
+import { OpenAI } from "openai";
+
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+async function summarizeMeeting(transcript: string) {
+  const response = await openai.chat.completions.create({
+    model: "gpt-4",
+    messages: [
+      {
+        role: "system",
+        content: "You are a meeting assistant. Summarize the following transcript with key points, decisions, and action items."
+      },
+      {
+        role: "user",
+        content: transcript
+      }
+    ],
+    temperature: 0.3,
+  });
+
+  return response.choices[0].message.content;
+}
+
+// Usage
+const summary = await summarizeMeeting(transcriptText);
+console.log(summary);
+\`\`\`
+
+### Action Item Extraction
+
+\`\`\`typescript
+async function extractActionItems(transcript: string) {
+  const response = await openai.chat.completions.create({
+    model: "gpt-4",
+    messages: [
+      {
+        role: "system",
+        content: "Extract all action items from this meeting. Format as JSON array with: task, assignee, dueDate."
+      },
+      {
+        role: "user",
+        content: transcript
+      }
+    ],
+  });
+
+  return JSON.parse(response.choices[0].message.content);
+}
+
+// Example output
+// [
+//   { "task": "Update API documentation", "assignee": "John", "dueDate": "2026-04-20" },
+//   { "task": "Schedule follow-up meeting", "assignee": "Sarah", "dueDate": "2026-04-22" }
+// ]
+\`\`\`
+
+## Best Practices
+
+### 1. Set Clear Permissions
+
+Before using AI meeting tools:
+- Get team consent for recording
+- Configure privacy settings
+- Choose what gets transcribed
+
+### 2. Use Templates
+
+Create consistent meeting note templates:
+
+\`\`\`markdown
+# Meeting Notes - [Date]
+
+## Attendees
+-
+
+## Agenda
+1. 
+2. 
+
+## Discussion Points
+-
+
+## Decisions Made
+-
+
+## Action Items
+- [ ] 
+
+## Next Steps
+-
+\`\`\`
+
+### 3. Integrate with Your Workflow
+
+Connect AI notes to your existing tools:
+- Add action items to project management
+- Link to calendar events
+- Save to documentation wikis
+
+### 4. Review and Edit
+
+AI isn't perfect - always review notes:
+- Correct misheard names
+- Add context AI might have missed
+- Fill in gaps
+
+## Use Cases by Meeting Type
+
+### Daily Standups
+- Quick summaries
+- Blocker tracking
+- Progress updates
+
+### Sprint Planning
+- Story point estimates
+- Capacity planning
+- Sprint goal documentation
+
+### Code Reviews
+- Decision rationale
+- Implementation notes
+- Follow-up tasks
+
+### Client Meetings
+- Requirements confirmation
+- Action items
+- Next steps
+
+## Advanced: Building Your Own
+
+\`\`\`typescript
+// Full meeting assistant pipeline
+class MeetingAssistant {
+  constructor(
+    private transcriptService: TranscriptService,
+    private llm: LLMClient,
+    private storage: StorageService
+  ) {}
+
+  async processMeeting(audioUrl: string, metadata: MeetingMetadata) {
+    // 1. Transcribe
+    const transcript = await this.transcriptService.transcribe(audioUrl);
+    
+    // 2. Summarize
+    const summary = await this.llm.summarize(transcript);
+    
+    // 3. Extract action items
+    const actionItems = await this.llm.extractActionItems(transcript);
+    
+    // 4. Store results
+    const meeting = await this.storage.save({
+      transcript,
+      summary,
+      actionItems,
+      metadata,
+    });
+
+    // 5. Notify participants
+    await this.notifyParticipants(meeting);
+
+    return meeting;
+  }
+}
+\`\`\`
 
 ## Pros and Cons
 
@@ -4042,15 +4271,289 @@ AI can transcribe and summarize your meetings automatically.
 - ✅ Never miss important details
 - ✅ Action items are clearly tracked
 - ✅ Searchable meeting history
+- ✅ Consistent documentation
+- ✅ Focus on discussion, not writing
 
 **Cons:**
 - ❌ Privacy concerns with recording
 - ❌ May not capture tone accurately
 - ❌ Requires meeting bot permissions
+- ❌ May miss context-specific information
+- ❌ Can be expensive for large teams
 
 ## Conclusion
 
-AI-powered meeting notes are a game-changer for busy developers. They ensure nothing falls through the cracks and free you to focus on the discussion rather than taking notes. Give it a try at your next team meeting! 📝`,
+AI-powered meeting notes are a game-changer for busy developers. They ensure nothing falls through the cracks and free you to focus on the discussion rather than taking notes. Start with a free tool like Fireflies, and as your team grows, consider custom integrations.
+
+Give it a try at your next team meeting! 📝`,
+      es: `## Introducción
+
+Las reuniones son esenciales para la colaboración, pero tomar notas a menudo distrae de la conversación real. Los asistentes de reuniones con IA pueden manejar las notas por ti, permitiéndote enfocarte en la discusión.
+
+En esta guía, exploraremos cómo automatizar tus notas de reunión y documentación usando IA.
+
+## Por Qué Importan las Notas de Reunión con IA
+
+La toma de notas tradicional tiene varios problemas:
+- Perder puntos importantes mientras escribes
+- Notas incompletas o inconsistentes
+- Tiempo dedicado a transcribir en lugar de participar
+- Dificultad para encontrar información después
+
+La IA resuelve esto automáticamente transcribiendo, resumiendo y organizando tus reuniones.
+
+## Mejores Herramientas de IA para Reuniones
+
+### 1. Fireflies.ai
+
+Fireflies es uno de los asistentes de reuniones más populares.
+
+**Features:**
+- Transcripción automática para Google Meet, Zoom, Teams
+- Resúmenes potenciados por IA
+- Extracción de action items
+- Buscar en todas las reuniones
+
+**Precio:** Tier gratis disponible, Pro desde $10/mes
+
+### 2. Notion AI
+
+Notion integra IA directamente en tu espacio de trabajo.
+
+**Features:**
+- Asistencia de escritura con IA
+- Templates de notas de reunión
+- Auto-resúmenes de notas
+- Integración con calendario
+
+**Precio:** Incluido en planes de Notion desde $10/usuario/mes
+
+### 3. Ottery
+
+Ottery se especializa en toma de notas en tiempo real.
+
+**Features:**
+- Transcripción en tiempo real
+- Templates inteligentes
+- Colaboración en equipo
+- API para integraciones personalizadas
+
+### 4. Granola
+
+Granola se enfoca en notas con IA para macOS.
+
+**Features:**
+- Integración nativa con macOS
+- Resúmenes inteligentes
+- Integración con calendario
+- Fácil compartición
+
+## Implementación de Ejemplo
+
+### Usando la API de Fireflies
+
+\`\`\`typescript
+// Obtener transcripción de reunión
+const meetingId = "abc123";
+
+const transcript = await fireflies.getTranscript(meetingId, {
+  includeSpeakers: true,
+  includeTimestamps: true,
+});
+
+console.log(transcript.text);
+\`\`\`
+
+### Creando un Bot de Resumen de Reunión
+
+\`\`\`typescript
+import { OpenAI } from "openai";
+
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+async function summarizeMeeting(transcript: string) {
+  const response = await openai.chat.completions.create({
+    model: "gpt-4",
+    messages: [
+      {
+        role: "system",
+        content: "Eres un asistente de reuniones. Resume la siguiente transcripción con puntos clave, decisiones y action items."
+      },
+      {
+        role: "user",
+        content: transcript
+      }
+    ],
+    temperature: 0.3,
+  });
+
+  return response.choices[0].message.content;
+}
+
+// Uso
+const summary = await summarizeMeeting(transcriptText);
+console.log(summary);
+\`\`\`
+
+### Extracción de Action Items
+
+\`\`\`typescript
+async function extractActionItems(transcript: string) {
+  const response = await openai.chat.completions.create({
+    model: "gpt-4",
+    messages: [
+      {
+        role: "system",
+        content: "Extrae todos los action items de esta reunión. Formatea como JSON con: task, assignee, dueDate."
+      },
+      {
+        role: "user",
+        content: transcript
+      }
+    ],
+  });
+
+  return JSON.parse(response.choices[0].message.content);
+}
+
+// Ejemplo de output
+// [
+//   { "task": "Actualizar documentación de API", "assignee": "Juan", "dueDate": "2026-04-20" },
+//   { "task": "Programar reunión de seguimiento", "assignee": "María", "dueDate": "2026-04-22" }
+// ]
+\`\`\`
+
+## Mejores Prácticas
+
+### 1. Establece Permisos Claros
+
+Antes de usar herramientas de IA:
+- Obtén consentimiento del equipo para grabar
+- Configura ajustes de privacidad
+- Elige qué se transcribe
+
+### 2. Usa Templates
+
+Crea templates consistentes para notas de reunión:
+
+\`\`\`markdown
+# Notas de Reunión - [Fecha]
+
+## Asistentes
+-
+
+## Agenda
+1. 
+2. 
+
+## Puntos de Discusión
+-
+
+## Decisiones Tomadas
+-
+
+## Action Items
+- [ ] 
+
+## Próximos Pasos
+-
+\`\`\`
+
+### 3. Integra con Tu Flujo
+
+Conecta las notas de IA a tus herramientas existentes:
+- Agrega action items a gestión de proyectos
+- Vincula a eventos de calendario
+- Guarda en wikis de documentación
+
+### 4. Revisa y Edita
+
+La IA no es perfecta - siempre revisa las notas:
+- Corrige nombres mal escuchados
+- Agrega contexto que pueda haber faltado
+- Llena huecos
+
+## Casos de Uso por Tipo de Reunión
+
+### Daily Standups
+- Resúmenes rápidos
+- Seguimiento de blockers
+- Actualizaciones de progreso
+
+### Sprint Planning
+- Estimaciones de story points
+- Planificación de capacidad
+- Documentación de objetivo de sprint
+
+### Code Reviews
+- Racional de decisiones
+- Notas de implementación
+- Tasks de seguimiento
+
+### Reuniones con Clientes
+- Confirmación de requisitos
+- Action items
+- Próximos pasos
+
+## Avanzado: Construy Tu Propio
+
+\`\`\`typescript
+// Pipeline completo de asistente de reuniones
+class MeetingAssistant {
+  constructor(
+    private transcriptService: TranscriptService,
+    private llm: LLMClient,
+    private storage: StorageService
+  ) {}
+
+  async processMeeting(audioUrl: string, metadata: MeetingMetadata) {
+    // 1. Transcribir
+    const transcript = await this.transcriptService.transcribe(audioUrl);
+    
+    // 2. Resumir
+    const summary = await this.llm.summarize(transcript);
+    
+    // 3. Extraer action items
+    const actionItems = await this.llm.extractActionItems(transcript);
+    
+    // 4. Guardar resultados
+    const meeting = await this.storage.save({
+      transcript,
+      summary,
+      actionItems,
+      metadata,
+    });
+
+    // 5. Notificar participantes
+    await this.notifyParticipants(meeting);
+
+    return meeting;
+  }
+}
+\`\`\`
+
+## Pros y Contras
+
+**Pros:**
+- ✅ Ahorra tiempo en tomar notas
+- ✅ Nunca pierdes detalles importantes
+- ✅ Action items claramente trazados
+- ✅ Historial de reuniones buscable
+- ✅ Documentación consistente
+- ✅ Enfocarse en discusión, no en escribir
+
+**Contras:**
+- ❌ Preocupaciones de privacidad al grabar
+- ❌ Puede no capturar el tono con precisión
+- ❌ Requiere permisos de bot de reuniones
+- ❌ Puede perder información contextual
+- ❌ Puede ser costoso para equipos grandes
+
+## Conclusión
+
+Las notas de reuniones potenciadas con IA son un cambio de juego para developers ocupados. Aseguran que nada se escape y te liberan para enfocarte en la discusión en lugar de tomar notas. Comienza con una herramienta gratis como Fireflies, y a medida que tu equipo crece, considera integraciones personalizadas.
+
+Pruébalo en tu próxima reunión de equipo! 📝`,
     },
     category: "productivity",
     tags: ["productivity", "meetings", "documentation", "ai"],
