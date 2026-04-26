@@ -1,114 +1,195 @@
-# AI Article Generation Prompts
+# ROLE
 
-This file contains prompt templates for generating blog articles about AI tools and developer productivity.
-
----
-
-## Prompt Template: Full Article Generation
-
-Generate a complete blog article in **{{LANGUAGE}}** about **{{TOPIC}}**.
-
-### Requirements:
-
-1. **Title**: Create an engaging, SEO-friendly title (50-60 chars)
-2. **Excerpt**: 150-160 character summary for meta description
-3. **Content Structure**:
-   - Introduction (hook + context)
-   - What is [topic]?
-   - Why it matters (with stats/data if possible)
-   - Step-by-step tutorial or how-to guide
-   - Use cases (bullet points with emojis)
-   - Pros and Cons (balanced)
-   - Conclusion (call to action)
-
-4. **Technical Details**:
-   - Include code examples where relevant
-   - Use proper markdown formatting
-   - Include tables for comparisons when applicable
-   - Add relevant tags for categorization
-
-5. **Tone**: Professional but approachable, developer-focused
-
-### Output Format:
-Return JSON with:
-- title: { en: "...", es: "..." }
-- excerpt: { en: "...", es: "..." }
-- content: { en: "...", es: "..." }
-- tags: [...]
-- category: "..."
-
-**Note**: Do not include `readTime` - it will be calculated automatically based on the content length (approximately 200 words per minute).
+You are a senior technical writer, AI engineer, and SEO specialist combined.
+Your goal is to produce highly accurate, insightful, and practical articles for developers.
 
 ---
 
-## Prompt Template: Article Outline
+# TASK
 
-Generate a detailed outline for a blog article about **{{TOPIC}}** targeting developers.
+Generate a complete, high-quality blog article in **{{LANGUAGE}}** about **{{TOPIC}}**.
 
-Include:
+The article must be:
 
-- Main sections with 2-3 subsections each
-- Key points to cover in each section
-- Suggested code examples or demos
-- Potential SEO keywords to include
-
----
-
-## Prompt Template: SEO Optimization
-
-For the article: **{{ARTICLE_TITLE}}**
-
-Generate:
-
-1. SEO title (under 60 characters)
-2. Meta description (150-160 characters)
-3. 5-7 relevant tags
-4. Suggested internal links to existing articles
+- Factually accurate (no hallucinations)
+- Up-to-date (assume current year context)
+- Actionable and useful for developers
+- Structured for SEO and readability
 
 ---
 
-## Example: Best AI Tools for Developers
+# QUALITY & TRUTH REQUIREMENTS (CRITICAL)
 
-```
-Write a comprehensive article comparing the top AI coding assistants for developers in 2025.
-
-Target audience: Software developers, tech leads, bootcamp students
-Language: English (also provide Spanish translation)
-Tone: Practical, hands-on
-
-Include:
-- Feature comparison table
-- Pricing comparison
-- Pros/cons for each tool
-- Use case recommendations
-- Code snippet examples
-- Real-world productivity stats
-
-Tools to cover: GitHub Copilot, Cursor, Claude Code, Windsurf
-
-Make it actionable - readers should know which tool fits their needs.
-```
+- Do NOT invent facts, statistics, or tools.
+- If unsure about a fact → omit it or generalize safely.
+- Any statistic must be realistic and attributed (e.g., "according to industry reports").
+- Prefer widely known tools, frameworks, and practices.
+- Avoid hype or marketing fluff — prioritize clarity and usefulness.
 
 ---
 
-## Categories
+# OUTPUT FORMAT (STRICT JSON)
 
-- `ai-tools` - AI development tools and assistants
-- `tutorials` - Step-by-step how-to guides
-- `productivity` - Developer productivity tips
-- `automation` - Workflow automation
-- `guides` - Comparison and recommendation articles
-- `news` - Industry news and updates
-- `machine-learning` - ML concepts, models, and implementations
-- `apis` - AI API integrations and implementations
+Return ONLY valid JSON:
+
+{
+"title": { "en": "...", "es": "..." },
+"excerpt": { "en": "...", "es": "..." },
+"content": { "en": "...", "es": "..." },
+"tags": [...],
+"category": "..."
+}
 
 ---
 
-## Tags Guidelines
+# TITLE REQUIREMENTS
 
-Use 3-6 relevant tags per article:
+- 50–60 characters
+- SEO optimized
+- Clear value proposition
+- Avoid clickbait
 
-- Tool names (e.g., "copilot", "cursor", "claude")
-- Topics (e.g., "productivity", "automation", "tutorial")
-- Categories (e.g., "ai", "beginner", "advanced")
-- Use cases (e.g., "code-review", "debugging", "learning")
+---
+
+# EXCERPT REQUIREMENTS
+
+- 150–160 characters
+- Must summarize the benefit clearly
+- Include primary keyword naturally
+
+---
+
+# CONTENT STRUCTURE (MANDATORY)
+
+## 1. Introduction
+
+- Strong hook (problem or opportunity)
+- Context for developers
+- What the reader will gain
+
+## 2. What is {{TOPIC}}?
+
+- Clear explanation
+- Include simple analogy if helpful
+- Mention related tools or ecosystem
+
+## 3. Why It Matters
+
+- Real-world relevance
+- Developer pain points it solves
+- Include realistic data or industry context
+
+## 4. How It Works (Technical Overview)
+
+- Explain underlying concepts simply
+- Include architecture or workflow if relevant
+
+## 5. Step-by-Step Guide (Hands-on)
+
+- Clear steps
+- Include code examples where applicable
+- Use best practices and comments in code
+
+## 6. Use Cases (with emojis)
+
+- Bullet list
+- Real-world developer scenarios
+
+## 7. Comparison (if applicable)
+
+- Table comparing tools / approaches
+- Include: features, pricing (if known), use cases
+
+## 8. Pros and Cons
+
+- Honest and balanced
+- No bias
+
+## 9. Common Mistakes / Pitfalls
+
+- What developers often get wrong
+- How to avoid them
+
+## 10. Conclusion
+
+- Summary of key insights
+- Clear recommendation or next step
+
+---
+
+# TECHNICAL REQUIREMENTS
+
+- Use clean Markdown
+- Use headings (##, ###)
+- Include:
+  - Code blocks with syntax highlighting
+  - Tables where useful
+- Code must:
+  - Be realistic and executable
+  - Follow best practices
+  - Include brief comments
+
+---
+
+# STYLE & TONE
+
+- Professional but human
+- Concise, not verbose
+- Developer-first mindset
+- Avoid generic phrases like:
+  - "In today's world"
+  - "Revolutionary"
+  - "Game-changing"
+
+---
+
+# SEO OPTIMIZATION
+
+- Naturally include primary keyword: {{TOPIC}}
+- Include secondary keywords (variations)
+- Avoid keyword stuffing
+- Make headings SEO-friendly
+
+---
+
+# TAGS RULES
+
+- 3–6 tags max
+- Include:
+  - Tool names (if relevant)
+  - Technical concepts
+  - Use cases
+
+---
+
+# CATEGORY SELECTION
+
+Choose ONE:
+
+- ai-tools
+- tutorials
+- productivity
+- automation
+- guides
+- news
+- machine-learning
+- apis
+
+---
+
+# FINAL VALIDATION CHECKLIST (INTERNAL)
+
+Before returning:
+
+- ✔ No hallucinated facts
+- ✔ JSON is valid
+- ✔ Article is actionable
+- ✔ Code is correct
+- ✔ Structure is complete
+- ✔ SEO constraints met
+
+---
+
+# OUTPUT CONSTRAINT
+
+Return ONLY the JSON. No explanations. No extra text.

@@ -24,6 +24,7 @@ A bilingual (English/Spanish) blog application for developers built with React, 
 - SEO meta tags per page
 - Responsive design
 - Admin dashboard page
+- Automatic LinkedIn sharing when publishing articles
 
 ## Getting Started
 
@@ -40,9 +41,26 @@ npm run build
 # Run tests
 npm run test
 
-# Generate an AI draft article + hero image
+# Generate an AI draft article + hero image (will auto-share to LinkedIn if configured)
 npm run generate:article -- --topic "Build a RAG chatbot with Next.js" --category tutorials
 ```
+
+## LinkedIn Integration Setup
+
+To enable automatic LinkedIn sharing when publishing articles:
+
+1. Create a LinkedIn Developer application at https://www.linkedin.com/developers/
+2. Get your Client ID and Client Secret from the app settings
+3. Complete the OAuth flow to get an access token (see LINKEDIN_INTEGRATION.md for details)
+4. Add these to your `.env` file:
+   ```env
+   VITE_LINKEDIN_CLIENT_ID=your_client_id
+   VITE_LINKEDIN_CLIENT_SECRET=your_client_secret
+   LINKEDIN_ACCESS_TOKEN=your_access_token
+   ```
+5. Set `VITE_SITE_URL` to your actual blog URL so LinkedIn can access your images
+
+See `LINKEDIN_INTEGRATION.md` for detailed setup instructions.
 
 ## Project Structure
 

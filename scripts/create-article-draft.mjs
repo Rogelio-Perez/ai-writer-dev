@@ -12,6 +12,8 @@ const postsFile = path.join(repoRoot, "src", "data", "posts.ts");
 const draftsDir = path.join(repoRoot, "content", "drafts");
 const articleImagesDir = path.join(repoRoot, "public", "articles");
 const envFile = path.join(repoRoot, ".env");
+const promptsFile = path.join(repoRoot, "prompts.md");
+
 const defaultImageStylePreset = [
   "Create a horizontal editorial hero illustration for a modern developer blog.",
   "Use a restrained visual system aligned to the site design: crisp white or light neutral background, deep charcoal shadows, and green accent lighting close to emerald terminal green.",
@@ -111,6 +113,18 @@ async function loadEnvFile() {
   }
 }
 
+async function loadArticlePromptTemplate() {
+  try {
+    return await readFile(promptsFile, "utf8");
+  } catch (error) {
+    if (error && typeof error === "object" && "code" in error && error.code === "ENOENT") {
+      return "";
+    }
+
+    throw error;
+  }
+}
+
 function getTodayDate() {
   return new Date().toISOString().slice(0, 10);
 }
@@ -146,23 +160,33 @@ function escapeTemplateLiteral(value) {
   return value.replace(/\\/g, "\\\\").replace(/`/g, "\\`").replace(/\$\{/g, "\\${");
 }
 
+function parseJsonOrNull(text) {
+  if (!text.trim()) {
+    return null;
+  }
+
+  return JSON.parse(text);
+}
+
 function runCurlJson({ apiKey, url, body }) {
   return new Promise((resolve, reject) => {
-    const child = spawn("curl.exe", [
-      "-sS",
-      "--ssl-no-revoke",
-      "-X",
-      "POST",
-      url,
-      "-H",
-      `Authorization: Bearer ${apiKey}`,
-      "-H",
-      "Content-Type: application/json",
-      "--data-binary",
-      "@-",
-    ], {
-      stdio: ["pipe", "pipe", "pipe"],
-    });
+    const child = spawn(
+      "curl.exe",
+      [
+        "-sS",
+        "--ssl-no-revoke",
+        "-X",
+        "POST",
+        url,
+        "-H",
+        `Authorization: Bearer ${apiKey}`,
+        "-H",
+        "Content-Type: application/json",
+        "--data-binary",
+        "@-",
+      ],
+      { stdio: ["pipe", "pipe", "pipe"] }
+    );
 
     let stdout = "";
     let stderr = "";
@@ -175,7 +199,7 @@ function runCurlJson({ apiKey, url, body }) {
       stderr += chunk.toString();
     });
 
-    child.on("error", (error) => reject(error));
+    child.on("error", reject);
     child.on("close", (code) => {
       if (code !== 0) {
         reject(new Error(`curl failed with exit code ${code}: ${stderr || stdout}`));
@@ -183,8 +207,8 @@ function runCurlJson({ apiKey, url, body }) {
       }
 
       try {
-        resolve(JSON.parse(stdout));
-      } catch (error) {
+        resolve(parseJsonOrNull(stdout));
+      } catch {
         reject(new Error(`curl returned non-JSON output: ${stdout.slice(0, 500)}`));
       }
     });
@@ -206,12 +230,7 @@ async function postOpenAiJson({ apiKey, url, body }) {
     });
 
     const text = await response.text();
-    let parsed;
-    try {
-      parsed = JSON.parse(text);
-    } catch {
-      parsed = null;
-    }
+    const parsed = parseJsonOrNull(text);
 
     if (!response.ok) {
       throw new Error(`${response.status} ${text}`);
@@ -225,6 +244,58 @@ async function postOpenAiJson({ apiKey, url, body }) {
 
     throw error;
   }
+}
+
+function runCurlRequest({ method, url, headers = {}, body, binaryBody, allowEmpty = false }) {
+  return new Promise((resolve, reject) => {
+    const headerArgs = Object.entries(headers).flatMap(([key, value]) => ["-H", `${key}: ${value}`]);
+    const baseArgs = ["-sS", "--ssl-no-revoke", "-X", method, url, ...headerArgs];
+
+    if (body !== undefined || binaryBody !== undefined) {
+      baseArgs.push("--data-binary", "@-");
+    }
+
+    const child = spawn("curl.exe", baseArgs, {
+      stdio: ["pipe", "pipe", "pipe"],
+    });
+
+    let stdout = "";
+    let stderr = "";
+
+    child.stdout.on("data", (chunk) => {
+      stdout += chunk.toString();
+    });
+
+    child.stderr.on("data", (chunk) => {
+      stderr += chunk.toString();
+    });
+
+    child.on("error", reject);
+    child.on("close", (code) => {
+      if (code !== 0) {
+        reject(new Error(`curl failed with exit code ${code}: ${stderr || stdout}`));
+        return;
+      }
+
+      if (allowEmpty && !stdout.trim()) {
+        resolve(null);
+        return;
+      }
+
+      try {
+        resolve(parseJsonOrNull(stdout));
+      } catch {
+        reject(new Error(`curl returned non-JSON output: ${stdout.slice(0, 500)}`));
+      }
+    });
+
+    if (body !== undefined) {
+      child.stdin.write(JSON.stringify(body));
+    } else if (binaryBody !== undefined) {
+      child.stdin.write(binaryBody);
+    }
+    child.stdin.end();
+  });
 }
 
 function formatPostForTs(post) {
@@ -257,7 +328,17 @@ function formatPostForTs(post) {
   return lines.join("\n");
 }
 
-async function requestArticleDraft({ apiKey, textModel, topic, category, author, slug, publishedAt, imageStylePreset }) {
+async function requestArticleDraft({
+  apiKey,
+  textModel,
+  topic,
+  category,
+  author,
+  slug,
+  publishedAt,
+  imageStylePreset,
+  promptTemplate,
+}) {
   const schema = {
     type: "object",
     additionalProperties: false,
@@ -306,26 +387,31 @@ async function requestArticleDraft({ apiKey, textModel, topic, category, author,
     },
   };
 
+  const basePrompt = promptTemplate
+    ? promptTemplate
+        .replaceAll("{{LANGUAGE}}", "English and Spanish")
+        .replaceAll("{{TOPIC}}", topic)
+    : "";
+
   const prompt = [
-    "Return JSON only.",
+    basePrompt,
     "",
-    `Create a bilingual developer blog article about: ${topic}`,
-    `Category: ${category}`,
-    `Slug: ${slug}`,
-    `Author: ${author}`,
-    `Published date: ${publishedAt}`,
-    "",
-    "Requirements:",
+    "Additional output requirements for this project:",
+    `- Category must be exactly "${category}".`,
+    `- Slug must align with "${slug}".`,
+    `- Author must be "${author}".`,
+    `- Published date is "${publishedAt}".`,
+    "- Return JSON only.",
     "- English and Spanish content must both be complete, natural, and publication-ready.",
-    "- Follow this structure in each language: Introduction, What is it, Why it matters, Step-by-step tutorial, Use Cases, Pros and Cons, Conclusion.",
-    "- Include markdown headings, code examples where relevant, and practical developer-focused guidance.",
-    "- The excerpt should be SEO-friendly and around 150-160 characters.",
     "- Keep tags lowercase and relevant.",
+    "- Add imagePrompt as a top-level field in the JSON.",
     "- The imagePrompt must describe a professional landscape blog hero image related to the article topic.",
     "- The imagePrompt must respect this fixed visual art direction:",
     imageStylePreset,
     "- Avoid brand logos, watermarks, UI screenshots, or text-heavy artwork in the image prompt.",
-  ].join("\n");
+  ]
+    .filter(Boolean)
+    .join("\n");
 
   const responseJson = await postOpenAiJson({
     apiKey,
@@ -363,9 +449,10 @@ async function requestArticleDraft({ apiKey, textModel, topic, category, author,
     },
   });
 
-  if (responseJson.error) {
+  if (responseJson?.error) {
     throw new Error(`Text generation failed: ${JSON.stringify(responseJson)}`);
   }
+
   return JSON.parse(extractOutputText(responseJson));
 }
 
@@ -382,12 +469,11 @@ async function requestHeroImage({ apiKey, imageModel, prompt }) {
     },
   });
 
-  if (responseJson.error) {
+  if (responseJson?.error) {
     throw new Error(`Image generation failed: ${JSON.stringify(responseJson)}`);
   }
 
   const imageBase64 = responseJson.data?.[0]?.b64_json;
-
   if (!imageBase64) {
     throw new Error("Image generation response did not contain image data.");
   }
@@ -420,14 +506,225 @@ async function writeDraftArtifacts({ post, imageBuffer, draftOnly }) {
     await writeFile(postsFile, nextSource, "utf8");
   }
 
-  return {
-    draftPath,
-    imagePath,
-  };
+  return { draftPath, imagePath };
+}
+
+function getLinkedInVersion() {
+  const configured = process.env.LINKEDIN_VERSION?.trim();
+  return configured || "202604";
+}
+
+function getLinkedInIdentityVersion() {
+  const configured = process.env.LINKEDIN_IDENTITY_VERSION?.trim();
+  return configured || "202510.03";
+}
+
+function getConfiguredLinkedInMemberId() {
+  const authorUrn = process.env.LINKEDIN_AUTHOR_URN?.trim();
+  if (authorUrn?.startsWith("urn:li:person:")) {
+    return authorUrn.slice("urn:li:person:".length);
+  }
+
+  return process.env.LINKEDIN_MEMBER_ID?.trim() || "";
+}
+
+function getArticleUrl(post) {
+  const baseUrl = (process.env.VITE_SITE_URL || "")
+    .trim()
+    .replace(/\/+$/, "")
+    .replace(/\/(en|es)$/, "");
+  if (!baseUrl || baseUrl.includes("your-site.example.com") || baseUrl.includes("yourblog.com")) {
+    throw new Error("VITE_SITE_URL must be set to your public site URL before publishing to LinkedIn.");
+  }
+
+  return `${baseUrl}/en/blog/${post.slug}`;
+}
+
+function formatLinkedInCommentary(post, articleUrl) {
+  return [
+    post.title.en,
+    "",
+    post.excerpt.en,
+    "",
+    `Read the full article: ${articleUrl}`,
+    "",
+    "#AI #Developer #Programming #Tech",
+  ].join("\n");
+}
+
+async function shareToLinkedIn(post, imageBuffer) {
+  const accessToken = process.env.LINKEDIN_ACCESS_TOKEN?.trim();
+  if (!accessToken) {
+    console.warn("LinkedIn access token not found; skipping LinkedIn publishing.");
+    return;
+  }
+
+  const linkedInVersion = getLinkedInVersion();
+  const articleUrl = getArticleUrl(post);
+  const commentary = formatLinkedInCommentary(post, articleUrl);
+  let memberId = getConfiguredLinkedInMemberId();
+
+  const identityVersion = getLinkedInIdentityVersion();
+  let lastIdentityError = "";
+
+  if (!memberId) {
+    const identityMe = await runCurlRequest({
+      method: "GET",
+      url: "https://api.linkedin.com/rest/identityMe",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Linkedin-Version": identityVersion,
+      },
+      allowEmpty: true,
+    }).catch((error) => {
+      lastIdentityError = error.message;
+      return null;
+    });
+
+    if (identityMe?.id) {
+      memberId = identityMe.id;
+    } else if (identityMe?.message && !lastIdentityError) {
+      lastIdentityError = identityMe.message;
+    }
+  }
+
+  if (!memberId) {
+    const legacyProfile = await runCurlRequest({
+      method: "GET",
+      url: "https://api.linkedin.com/v2/me",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "X-Restli-Protocol-Version": "2.0.0",
+        "Linkedin-Version": linkedInVersion,
+      },
+      allowEmpty: true,
+    }).catch((error) => {
+      lastIdentityError = error.message;
+      return null;
+    });
+
+    if (legacyProfile?.id) {
+      memberId = legacyProfile.id;
+    } else if (!lastIdentityError) {
+      lastIdentityError = legacyProfile?.message || "Could not retrieve the LinkedIn member profile.";
+    }
+  }
+
+  if (!memberId) {
+    const userInfo = await runCurlRequest({
+      method: "GET",
+      url: "https://api.linkedin.com/v2/userinfo",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      allowEmpty: true,
+    }).catch((error) => {
+      lastIdentityError = error.message;
+      return null;
+    });
+
+    if (userInfo?.sub) {
+      memberId = userInfo.sub;
+    } else if (!lastIdentityError) {
+      lastIdentityError = userInfo?.message || "Could not retrieve the LinkedIn user identity.";
+    }
+  }
+
+  if (!memberId) {
+    throw new Error(
+      `${lastIdentityError || "Could not retrieve the LinkedIn member profile."} Set LINKEDIN_MEMBER_ID in .env to bypass profile lookup for posting-only tokens.`
+    );
+  }
+
+  const authorUrn = `urn:li:person:${memberId}`;
+
+  const initializeUploadResponse = await runCurlRequest({
+    method: "POST",
+    url: "https://api.linkedin.com/rest/images?action=initializeUpload",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+      "X-Restli-Protocol-Version": "2.0.0",
+      "Linkedin-Version": linkedInVersion,
+    },
+    body: {
+      initializeUploadRequest: {
+        owner: authorUrn,
+      },
+    },
+  });
+
+  const uploadUrl = initializeUploadResponse?.value?.uploadUrl;
+  const imageUrn = initializeUploadResponse?.value?.image;
+
+  if (!uploadUrl || !imageUrn) {
+    throw new Error(`LinkedIn image initialization failed: ${JSON.stringify(initializeUploadResponse)}`);
+  }
+
+  await new Promise((resolve, reject) => {
+    const child = spawn(
+      "curl.exe",
+      ["-sS", "--ssl-no-revoke", "-X", "PUT", uploadUrl, "-H", "Content-Type: image/png", "--data-binary", "@-"],
+      { stdio: ["pipe", "pipe", "pipe"] }
+    );
+
+    let stderr = "";
+    child.stderr.on("data", (chunk) => {
+      stderr += chunk.toString();
+    });
+    child.on("error", reject);
+    child.on("close", (code) => {
+      if (code !== 0) {
+        reject(new Error(`LinkedIn image upload failed: ${stderr}`));
+        return;
+      }
+
+      resolve();
+    });
+
+    child.stdin.write(imageBuffer);
+    child.stdin.end();
+  });
+
+  await runCurlRequest({
+    method: "POST",
+    url: "https://api.linkedin.com/rest/posts",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+      "X-Restli-Protocol-Version": "2.0.0",
+      "Linkedin-Version": linkedInVersion,
+    },
+    body: {
+      author: authorUrn,
+      commentary,
+      visibility: "PUBLIC",
+      distribution: {
+        feedDistribution: "MAIN_FEED",
+        targetEntities: [],
+        thirdPartyDistributionChannels: [],
+      },
+      lifecycleState: "PUBLISHED",
+      isReshareDisabledByAuthor: false,
+      content: {
+        article: {
+          source: articleUrl,
+          title: post.title.en,
+          description: post.excerpt.en,
+          thumbnail: imageUrn,
+          thumbnailAltText: post.title.en,
+        },
+      },
+    },
+    allowEmpty: true,
+  });
+
+  console.log(`LinkedIn post published for ${articleUrl}`);
 }
 
 async function main() {
   await loadEnvFile();
+  const promptTemplate = await loadArticlePromptTemplate();
 
   const args = parseArgs(process.argv.slice(2));
   const apiKey = process.env.OPENAI_API_KEY;
@@ -462,6 +759,7 @@ async function main() {
     slug,
     publishedAt,
     imageStylePreset,
+    promptTemplate,
   });
 
   if (draft.category !== category) {
@@ -497,11 +795,14 @@ async function main() {
 
   console.log(`Created draft: ${path.relative(repoRoot, draftPath)}`);
   console.log(`Created image: ${path.relative(repoRoot, imagePath)}`);
+
   if (draftOnly) {
     console.log("Draft-only mode enabled; src/data/posts.ts was not modified.");
-  } else {
-    console.log("Updated src/data/posts.ts with the new article entry.");
+    return;
   }
+
+  console.log("Updated src/data/posts.ts with the new article entry.");
+  await shareToLinkedIn(post, imageBuffer);
 }
 
 main().catch((error) => {
