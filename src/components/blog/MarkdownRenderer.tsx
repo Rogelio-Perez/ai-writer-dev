@@ -1,51 +1,140 @@
 import { useMemo } from "react";
 
-function parseMarkdown(md: string): string {
-  let html = md;
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
 
-  // Code blocks
-  html = html.replace(/```(\w+)?\n([\s\S]*?)```/g, (_, lang, code) => {
-    return `<pre><code class="language-${lang || ""}">${code.replace(/</g, "&lt;").replace(/>/g, "&gt;").trim()}</code></pre>`;
-  });
-
-  // Inline code
+function parseInline(text: string) {
+  let html = escapeHtml(text);
   html = html.replace(/`([^`]+)`/g, "<code>$1</code>");
-
-  // Tables
-  html = html.replace(/^\|(.+)\|\s*\n\|[-|\s]+\|\s*\n((?:\|.+\|\s*\n?)*)/gm, (_, headerRow, bodyRows) => {
-    const headers = headerRow.split("|").map((h: string) => h.trim()).filter(Boolean);
-    const rows = bodyRows.trim().split("\n").map((row: string) =>
-      row.split("|").map((c: string) => c.trim()).filter(Boolean)
-    );
-    return `<table><thead><tr>${headers.map((h: string) => `<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.map((r: string[]) => `<tr>${r.map((c: string) => `<td>${c}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
-  });
-
-  // Headers
-  html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
-  html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
-  html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
-
-  // Bold and italic
   html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
   html = html.replace(/\*(.+?)\*/g, "<em>$1</em>");
-
-  // Lists
-  html = html.replace(/^- (.+)$/gm, "<li>$1</li>");
-  html = html.replace(/((?:<li>.*<\/li>\n?)+)/g, "<ul>$1</ul>");
-
-  // Blockquotes
-  html = html.replace(/^> (.+)$/gm, "<blockquote><p>$1</p></blockquote>");
-
-  // Paragraphs (lines that don't start with HTML tags)
-  html = html.replace(/^(?!<[a-z])((?!^\s*$).+)$/gm, (match) => {
-    if (match.startsWith("<")) return match;
-    return `<p>${match}</p>`;
-  });
-
-  // Clean up empty paragraphs
-  html = html.replace(/<p>\s*<\/p>/g, "");
-
   return html;
+}
+
+function isTableDivider(line: string) {
+  const trimmed = line.trim();
+  return /^\|?(?:\s*:?-{3,}:?\s*\|)+\s*:?-{3,}:?\s*\|?$/.test(trimmed);
+}
+
+function splitTableRow(row: string) {
+  return row
+    .trim()
+    .replace(/^\|/, "")
+    .replace(/\|$/, "")
+    .split("|")
+    .map((cell) => cell.trim());
+}
+
+function renderTable(lines: string[], startIndex: number) {
+  const headerCells = splitTableRow(lines[startIndex]);
+  let currentIndex = startIndex + 2;
+  const bodyRows: string[][] = [];
+
+  while (currentIndex < lines.length && /^\|.*\|$/.test(lines[currentIndex].trim())) {
+    bodyRows.push(splitTableRow(lines[currentIndex]));
+    currentIndex += 1;
+  }
+
+  const head = `<thead><tr>${headerCells.map((cell) => `<th>${parseInline(cell)}</th>`).join("")}</tr></thead>`;
+  const body = `<tbody>${bodyRows
+    .map((row) => `<tr>${row.map((cell) => `<td>${parseInline(cell)}</td>`).join("")}</tr>`)
+    .join("")}</tbody>`;
+
+  return {
+    html: `<table>${head}${body}</table>`,
+    nextIndex: currentIndex,
+  };
+}
+
+function parseMarkdown(md: string): string {
+  const lines = md.replace(/\r\n/g, "\n").split("\n");
+  const blocks: string[] = [];
+  let index = 0;
+
+  while (index < lines.length) {
+    const line = lines[index];
+    const trimmed = line.trim();
+
+    if (!trimmed) {
+      index += 1;
+      continue;
+    }
+
+    const codeFence = trimmed.match(/^```(\w+)?$/);
+    if (codeFence) {
+      const lang = codeFence[1] || "";
+      const codeLines: string[] = [];
+      index += 1;
+      while (index < lines.length && !lines[index].trim().startsWith("```")) {
+        codeLines.push(lines[index]);
+        index += 1;
+      }
+      if (index < lines.length) index += 1;
+      blocks.push(`<pre><code class="language-${lang}">${escapeHtml(codeLines.join("\n").trim())}</code></pre>`);
+      continue;
+    }
+
+    if (/^\|.*\|$/.test(trimmed) && index + 1 < lines.length && isTableDivider(lines[index + 1])) {
+      const table = renderTable(lines, index);
+      blocks.push(table.html);
+      index = table.nextIndex;
+      continue;
+    }
+
+    const heading = line.match(/^(#{1,3})\s+(.+)$/);
+    if (heading) {
+      const level = heading[1].length;
+      blocks.push(`<h${level}>${parseInline(heading[2].trim())}</h${level}>`);
+      index += 1;
+      continue;
+    }
+
+    if (trimmed.startsWith("> ")) {
+      const quoteLines: string[] = [];
+      while (index < lines.length && lines[index].trim().startsWith("> ")) {
+        quoteLines.push(parseInline(lines[index].trim().slice(2)));
+        index += 1;
+      }
+      blocks.push(`<blockquote>${quoteLines.map((quoteLine) => `<p>${quoteLine}</p>`).join("")}</blockquote>`);
+      continue;
+    }
+
+    if (/^- /.test(trimmed)) {
+      const listItems: string[] = [];
+      while (index < lines.length && /^- /.test(lines[index].trim())) {
+        listItems.push(`<li>${parseInline(lines[index].trim().slice(2))}</li>`);
+        index += 1;
+      }
+      blocks.push(`<ul>${listItems.join("")}</ul>`);
+      continue;
+    }
+
+    const paragraphLines: string[] = [];
+    while (index < lines.length) {
+      const paragraphLine = lines[index];
+      const paragraphTrimmed = paragraphLine.trim();
+
+      if (!paragraphTrimmed) break;
+      if (paragraphTrimmed.startsWith("```")) break;
+      if (/^(#{1,3})\s+/.test(paragraphLine)) break;
+      if (paragraphTrimmed.startsWith("> ")) break;
+      if (/^- /.test(paragraphTrimmed)) break;
+      if (/^\|.*\|$/.test(paragraphTrimmed) && index + 1 < lines.length && isTableDivider(lines[index + 1])) break;
+
+      paragraphLines.push(paragraphTrimmed);
+      index += 1;
+    }
+
+    blocks.push(`<p>${parseInline(paragraphLines.join(" "))}</p>`);
+  }
+
+  return blocks.join("\n");
 }
 
 export function extractHeadings(content: string): { id: string; text: string; level: number }[] {
@@ -63,7 +152,6 @@ export function extractHeadings(content: string): { id: string; text: string; le
 export default function MarkdownRenderer({ content }: { content: string }) {
   const html = useMemo(() => {
     let processed = parseMarkdown(content);
-    // Add IDs to headings for TOC linking
     processed = processed.replace(/<h([123])>(.+?)<\/h[123]>/g, (_, level, text) => {
       const id = text.replace(/<[^>]+>/g, "").toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-");
       return `<h${level} id="${id}">${text}</h${level}>`;

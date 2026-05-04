@@ -1,14 +1,13 @@
 #!/usr/bin/env node
 
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const repoRoot = path.resolve(__dirname, "..");
-const postsFile = path.join(repoRoot, "src", "data", "posts.ts");
 const draftsDir = path.join(repoRoot, "content", "drafts");
 const articleImagesDir = path.join(repoRoot, "public", "articles");
 const envFile = path.join(repoRoot, ".env");
@@ -56,6 +55,32 @@ function parseArgs(argv) {
   }
 
   return args;
+}
+
+function getCurrentGitBranch() {
+  const result = spawnSync("git", ["branch", "--show-current"], {
+    cwd: repoRoot,
+    encoding: "utf8",
+  });
+
+  if (result.status !== 0) {
+    throw new Error(`Could not determine the current git branch: ${result.stderr || result.stdout}`);
+  }
+
+  return (result.stdout || "").trim();
+}
+
+function assertArticleBranch() {
+  const requiredBranch = (process.env.ARTICLE_REQUIRED_BRANCH || "articles").trim();
+  const branch = getCurrentGitBranch();
+
+  if (!branch) {
+    throw new Error("Could not determine the current git branch.");
+  }
+
+  if (branch !== requiredBranch) {
+    throw new Error(`Article generation must run on the "${requiredBranch}" branch. Current branch: "${branch}".`);
+  }
 }
 
 function slugify(value) {
@@ -154,10 +179,6 @@ function extractOutputText(responseJson) {
   }
 
   throw new Error("Could not extract model text output from Responses API response.");
-}
-
-function escapeTemplateLiteral(value) {
-  return value.replace(/\\/g, "\\\\").replace(/`/g, "\\`").replace(/\$\{/g, "\\${");
 }
 
 function parseJsonOrNull(text) {
@@ -296,36 +317,6 @@ function runCurlRequest({ method, url, headers = {}, body, binaryBody, allowEmpt
     }
     child.stdin.end();
   });
-}
-
-function formatPostForTs(post) {
-  const lines = [
-    "  {",
-    `    slug: ${JSON.stringify(post.slug)},`,
-    "    title: {",
-    `      en: ${JSON.stringify(post.title.en)},`,
-    `      es: ${JSON.stringify(post.title.es)},`,
-    "    },",
-    "    excerpt: {",
-    `      en: ${JSON.stringify(post.excerpt.en)},`,
-    `      es: ${JSON.stringify(post.excerpt.es)},`,
-    "    },",
-    "    content: {",
-    `      en: \`${escapeTemplateLiteral(post.content.en)}\`,`,
-    `      es: \`${escapeTemplateLiteral(post.content.es)}\`,`,
-    "    },",
-    `    category: ${JSON.stringify(post.category)},`,
-    `    tags: ${JSON.stringify(post.tags)},`,
-    `    author: ${JSON.stringify(post.author)},`,
-    `    publishedAt: ${JSON.stringify(post.publishedAt)},`,
-    `    readTime: ${post.readTime},`,
-    `    featured: ${post.featured ? "true" : "false"},`,
-    `    image: ${JSON.stringify(post.image)},`,
-    `    imagePrompt: ${JSON.stringify(post.imagePrompt)},`,
-    "  },",
-  ];
-
-  return lines.join("\n");
 }
 
 async function requestArticleDraft({
@@ -488,25 +479,36 @@ async function writeDraftArtifacts({ post, imageBuffer, draftOnly }) {
   const draftPath = path.join(draftsDir, `${post.slug}.json`);
   const imagePath = path.join(articleImagesDir, `${post.slug}.png`);
 
+  try {
+    await readFile(draftPath, "utf8");
+    throw new Error(`A draft with slug "${post.slug}" already exists in content/drafts.`);
+  } catch (error) {
+    if (!(error && typeof error === "object" && "code" in error && error.code === "ENOENT")) {
+      throw error;
+    }
+  }
+
   await writeFile(draftPath, `${JSON.stringify(post, null, 2)}\n`, "utf8");
   await writeFile(imagePath, imageBuffer);
 
-  if (!draftOnly) {
-    const postsSource = await readFile(postsFile, "utf8");
-    if (postsSource.includes(`slug: "${post.slug}"`)) {
-      throw new Error(`A post with slug "${post.slug}" already exists in src/data/posts.ts`);
-    }
-
-    const insertionPoint = postsSource.lastIndexOf("\n];");
-    if (insertionPoint === -1) {
-      throw new Error("Could not find posts array terminator in src/data/posts.ts");
-    }
-
-    const nextSource = `${postsSource.slice(0, insertionPoint)}\n${formatPostForTs(post)}${postsSource.slice(insertionPoint)}`;
-    await writeFile(postsFile, nextSource, "utf8");
-  }
-
   return { draftPath, imagePath };
+}
+
+async function loadExistingDraft(slug) {
+  const draftPath = path.join(draftsDir, `${slug}.json`);
+  const imagePath = path.join(articleImagesDir, `${slug}.png`);
+
+  const [draftSource, imageBuffer] = await Promise.all([
+    readFile(draftPath, "utf8"),
+    readFile(imagePath),
+  ]);
+
+  return {
+    draftPath,
+    imagePath,
+    post: JSON.parse(draftSource),
+    imageBuffer,
+  };
 }
 
 function getLinkedInVersion() {
@@ -725,8 +727,16 @@ async function shareToLinkedIn(post, imageBuffer) {
 async function main() {
   await loadEnvFile();
   const promptTemplate = await loadArticlePromptTemplate();
+  assertArticleBranch();
 
   const args = parseArgs(process.argv.slice(2));
+  const publishExistingDraft = typeof args["publish-existing-draft"] === "string" ? slugify(String(args["publish-existing-draft"])) : "";
+  if (publishExistingDraft) {
+    const { post, imageBuffer } = await loadExistingDraft(publishExistingDraft);
+    await shareToLinkedIn(post, imageBuffer);
+    return;
+  }
+
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
     throw new Error("OPENAI_API_KEY is required.");
@@ -743,6 +753,7 @@ async function main() {
   const publishedAt = typeof args.publishedAt === "string" ? args.publishedAt : getTodayDate();
   const featured = args.featured === "true";
   const draftOnly = Boolean(args["draft-only"]);
+  const publishLinkedIn = Boolean(args["publish-linkedin"]);
   const textModel = process.env.OPENAI_TEXT_MODEL || "gpt-5-mini";
   const imageModel = process.env.OPENAI_IMAGE_MODEL || "gpt-image-1";
   const imageStylePreset =
@@ -797,11 +808,16 @@ async function main() {
   console.log(`Created image: ${path.relative(repoRoot, imagePath)}`);
 
   if (draftOnly) {
-    console.log("Draft-only mode enabled; src/data/posts.ts was not modified.");
+    console.log("Draft-only mode enabled; the article was written only to content/drafts and public/articles.");
     return;
   }
 
-  console.log("Updated src/data/posts.ts with the new article entry.");
+  console.log("Article saved through content/drafts. src/data/posts.ts now loads it automatically.");
+  if (!publishLinkedIn) {
+    console.log("LinkedIn publish skipped by default. Re-run with --publish-linkedin after approval if needed.");
+    return;
+  }
+
   await shareToLinkedIn(post, imageBuffer);
 }
 
