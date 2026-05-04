@@ -11,6 +11,7 @@ import BlogLayout from "@/components/blog/BlogLayout";
 import { resolveImageUrl } from "@/lib/site";
 import { getReadingTime } from "@/lib/utils";
 import { Clock, ArrowLeft, Tag } from "lucide-react";
+import NotFound from "./NotFound";
 
 export default function BlogPostPage() {
   const { locale } = useLocale();
@@ -18,16 +19,7 @@ export default function BlogPostPage() {
   const post = getPostBySlug(slug || "");
 
   if (!post) {
-    return (
-      <BlogLayout>
-        <div className="container mx-auto px-4 py-20 text-center">
-          <h1 className="text-2xl font-display font-bold text-foreground">Post not found</h1>
-          <Link to={localePath(locale, "/blog")} className="mt-4 inline-block text-primary">
-            Back to blog
-          </Link>
-        </div>
-      </BlogLayout>
-    );
+    return <NotFound locale={locale} />;
   }
 
   const content = post.content[locale];
