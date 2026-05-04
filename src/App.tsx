@@ -30,6 +30,7 @@ function LocaleRoutes({ locale }: { locale: "en" | "es" }) {
         <Route path="blog" element={<BlogListPage />} />
         <Route path="blog/:slug" element={<BlogPostPage />} />
         <Route path="categories" element={<CategoriesPage />} />
+        <Route path="*" element={<NotFound locale={locale} />} />
       </Routes>
     </LocaleProvider>
   );
