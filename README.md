@@ -90,6 +90,17 @@ AI article generation:
 npm run generate:article -- --topic "Automate release notes with GitHub Actions" --category tutorials --slug github-actions-ai-release-notes
 ```
 
+Important workflow protections:
+
+- Run article generation only on `articles`
+- The script will fail if you run it from `main`
+- LinkedIn publication is disabled by default
+- To publish to LinkedIn intentionally after approval:
+
+```bash
+npm run generate:article -- --topic "Automate release notes with GitHub Actions" --category tutorials --slug github-actions-ai-release-notes --publish-linkedin
+```
+
 What the script does:
 
 - generates a bilingual article draft from OpenAI
@@ -102,7 +113,8 @@ Review flow:
 
 1. Run article generation on `articles`
 2. Review the generated content and image in that branch
-3. Approve and merge into `main`
+3. Optionally publish to LinkedIn after approval
+4. Approve and merge into `main`
 
 ## TLS and Proxy Note
 
